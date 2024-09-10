@@ -4,9 +4,9 @@ import mysql from "mysql2/promise";
 const conn = mysql.createPool({
     host : "127.0.0.1",
     port: 3306,
-    user : "root",
-    password: "admin123",
-    database : "recipe_db"
+    user : process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database : process.env.DB_DATABASE,
 });
 
 export default{
