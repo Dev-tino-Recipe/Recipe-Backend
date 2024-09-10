@@ -1,5 +1,5 @@
 import express from "express";
-import {LengthCheck} from "../validator/common.js";
+import {UserNameLengthCheck, PasswordLengthCheck} from "../validator/common.js";
 import {UserNameCheck} from "../validator/auth.js";
 import authRepository from "../repository/authRepository.js";
 import CustomError from "../error/Error.js";
@@ -18,14 +18,8 @@ authController.post("/signup", async (req, res, next) => {
     const {user_name, password} = req.body;
 
     try {
-        LengthCheck('user_name',
-            user_name,
-            process.env.USER_NAME_MIN_LENGTH,
-            process.env.USER_NAME_MAX_LENGTH);
-        LengthCheck('password',
-            password,
-            process.env.PASSWORD_MIN_LENGTH,
-            process.env.PASSWORD_MAX_LENGTH);
+        UserNameLengthCheck('userName', user_name);
+        PasswordLengthCheck('password', password);
 
         const result = await authRepository.singUp(user_name, password);
         if(result){
