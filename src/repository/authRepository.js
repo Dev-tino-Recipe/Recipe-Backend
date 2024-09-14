@@ -3,7 +3,7 @@ import conn from  "../connection/connection.js";
 import {hashPassword} from "../connection/passwordHash..js";
 
 export default{
-    singUp: async (user_name, password) => {
+    signUp: async (user_name, password) => {
         const uuid = generate_uuid();
         const pwd = hashPassword(password);
         const res = await conn.query(`
