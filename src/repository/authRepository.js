@@ -1,9 +1,9 @@
-import {generate_uuid} from "../connection/uuid.js";
+import {generate_uuid} from "../utils/uuid.js";
 import conn from  "../connection/connection.js";
-import {hashPassword} from "../connection/passwordHash..js";
+import {hashPassword} from "../utils/passwordHash..js";
 
 export default{
-    singUp: async (user_name, password) => {
+    signUp: async (user_name, password) => {
         const uuid = generate_uuid();
         const pwd = hashPassword(password);
         const res = await conn.query(`
@@ -25,6 +25,10 @@ export default{
     },
     findByUserName: async (user_name) => {
         const rows = await conn.query(`SELECT * FROM Users WHERE User_Name = ?`, [user_name]);
+        return rows;
+    },
+    findByUserId: async (user_id) => {
+        const rows = await conn.query(`SELECT * FROM Users WHERE user_id = ?`, [user_id]);
         return rows;
     }
 }
