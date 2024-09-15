@@ -2,6 +2,9 @@ import express from "express";
 import logger from 'morgan';
 import authController from "./src/controller/authController.js";
 import recipeController from "./src/controller/recipeController.js";
+import imageController from "./src/controller/imageController.js";
+import CustomError from "./src/error/Error.js";
+import bookmarkController from "./src/controller/bookmarkController.js";
 
 const app = express();
 
@@ -11,6 +14,8 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use('/api/auth', authController);
 app.use('/api/recipe', recipeController);
+app.use('/api/img', imageController);
+app.use('/api/bookmark', bookmarkController);
 
 
 app.use((err, req, res, next) => {
