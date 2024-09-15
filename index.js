@@ -1,7 +1,7 @@
 import express from "express";
 import logger from 'morgan';
-import authController from "./src/controller/authController";
-import recipeController from "./src/controller/recipeController";
+import authController from "./src/controller/authController.js";
+import recipeController from "./src/controller/recipeController.js";
 
 const app = express();
 
