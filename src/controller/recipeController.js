@@ -1,8 +1,10 @@
 import express from "express";
-import {DescriptionLengthCheck, InRange,
+import {
+    DescriptionLengthCheck, InRange,
     NameLengthCheck, Positive, QuantityLengthCheck,
     TitleLengthCheck,
-    UserNameLengthCheck} from "../validator/common.js";
+    UserNameLengthCheck
+} from "../validator/common.js";
 import {UserNameCheck} from "../validator/auth.js";
 import CustomError from "../error/Error.js";
 import {upload} from "../aws/s3.js";
@@ -120,6 +122,5 @@ recipeController.post("/recipe/recent", async (req, res, next) => {
         next(e);
     }
 });
-
 
 export default recipeController;
