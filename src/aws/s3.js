@@ -32,5 +32,5 @@ const upload = multer({
 
 // 한 장 업로드
 export const upload_single = (name) => {
-    upload.single(name);
+    return upload.single(name);
 }

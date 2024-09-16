@@ -1,4 +1,4 @@
-import {generate_uuid} from "../utils/uuid.js";
+import { v4 as generate_uuid } from "uuid";
 import conn from  "../connection/connection.js";
 import {hashPassword} from "../utils/passwordHash.js";
 
@@ -42,4 +42,3 @@ export default{
     }
 
 }
-
