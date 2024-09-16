@@ -134,5 +134,4 @@ recipeController.post("/recipe/recent", async (req, res, next) => {
   }
 });
 
-
 export default recipeController;
