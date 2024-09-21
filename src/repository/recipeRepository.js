@@ -1,5 +1,6 @@
 import conn from "../connection/connection.js";
 import { v4 as generate_uuid } from "uuid";
+import recipeController from "../controller/recipeController.js";
 
 export default {
   createRecipe: async ({
@@ -76,11 +77,11 @@ export default {
 
   getRecipe: async (recipeId) => {
     const res = await conn.query(
-      `SELECT title, img_url, description, step_order FROM Instructions WHERE recipeId = ?`,
+      `SELECT title, img_url, description, step_order FROM Instructions WHERE recipe_id = ?`,
       [recipeId],
     );
     const ret = await conn.query(
-      `SELECT name, quantity FROM Ingredient WHERE recipeId = ?`,
+      `SELECT name, quantity FROM Ingredient WHERE recipe_id = ?`,
       [recipeId],
     );
     const reu = await conn.query(
@@ -109,4 +110,12 @@ export default {
       })),
     };
   },
+  getRecentRecipe : async (recipeId, placeholder) => {
+    const sql = `SELECT thumbnail, title, description FROM Recipes WHERE recipe_id IN (${placeholder})`;
+
+    const res = await conn.query(
+        sql,recipeId
+    );
+    return res;
+  }
 };

@@ -10,7 +10,7 @@ imageController.post('/upload/single', upload_single('photo'),  (req, res, next)
     try {
         const fileType = req.file.originalname.split('.');
         TypeCheck(fileType[fileType.length - 1]);
-        res.status(200).send({message: 'Successfully uploaded', location: req.file.location});
+        res.status(200).send({message: "upload was successful", location: req.file.location});
     }catch(e){
         next(e);
     }

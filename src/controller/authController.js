@@ -30,14 +30,14 @@ authController.post("/signup", async (req, res, next) => {
   }
 });
 
-authController.post("/duplicate", async (req, res, next) => {
+  authController.post("/duplicate", async (req, res, next) => {
   try {
     const user_name = req.body;
     const user = await UserNameCheck("user_name", user_name);
     if (user.length === 0) {
       res
         .status(200)
-        .json({ isSuccess: true, message: "사용가능한 아이디입니다." });
+        .json({ isSuccess: true, message: "사용 가능한 아이디입니다." });
       // res.status(200).json({isSuccess:false, message:"이미 존재하는 아이디입니다."});
     }
   } catch (e) {

@@ -57,7 +57,7 @@ recipeController.post(
       if (result) {
         res.status(200).json({
           is_success: true,
-          message: "레시피 등록에 성공적으로 생성되었습니다.",
+          message: "레시피 등록에 성공했습니다.",
           recipe_id,
         });
       } else {
@@ -93,13 +93,13 @@ recipeController.get("/recipe/posted", async (req, res, next) => {
       res.status(200).json({
         recipes: formattedRecipes,
         is_success: true,
-        message: "등록한 레시피 조회에 성공했습니다.",
+        message: "레시피 수정에 성공했습니다.",
       });
     } else {
       res.status(200).json({
         recipes: [],
         is_success: false,
-        message: "등록한 레시피가 없습니다.",
+        message: "레시피 수정에 실패했습니다.",
       });
     }
   } catch (e) {
@@ -107,10 +107,11 @@ recipeController.get("/recipe/posted", async (req, res, next) => {
   }
 });
 
-recipeController.get("/detail/:recipeId", async (req, res, next) => {
+recipeController.get("/detail", async (req, res, next) => {
   try {
-    const { recipeId } = req.params;
-    const result = await recipeRepository.getRecipe(recipeId);
+    const { recipe_id } = req.query;
+    // console.log(recipe_id);
+    const result = await recipeRepository.getRecipe(recipe_id);
     if (result.length) {
       res.status(200).json({
         isMine: false,
@@ -120,18 +121,36 @@ recipeController.get("/detail/:recipeId", async (req, res, next) => {
         result: result,
       });
     } else {
-      res.status(400).json({ message: "레시피가 없습니다.", result: result });
+      res.status(400).json({ message: "상세 레시피 조회가 실패했습니다.", result: result });
     }
   } catch (e) {
     next(e);
   }
 });
 
-recipeController.post("/recipe/recent", async (req, res, next) => {
+recipeController.get("/recent", async (req, res, next) => {
   try {
+    const { recipe_id } = req.body;
+    const recipe_ids = recipe_id.map((value) => value.value);
+    const placeholder = recipe_id.map(()=> '?').join(', ');
+
+    // 최근 레시피 조회
+    const result = await recipeRepository.getRecentRecipe(recipe_ids, placeholder);
+
+    if (result.length) {
+      res.status(200).json({
+        isSuccess: true,
+        message: "최근 본 레시피 조회에 성공했습니다",
+        result: result
+      });
+    } else {
+      res.status(404).json({
+        isSuccess: false,
+        message: "최근 본 레시피가 없습니다."
+      });
+    }
   } catch (e) {
     next(e);
   }
 });
-
 export default recipeController;

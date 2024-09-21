@@ -28,15 +28,15 @@ app.use('/api/recipe', recipeController);
 app.use('/api/img', imageController);
 app.use('/api/bookmark', bookmarkController);
 
-app.use((err, req, res, next) => {
-  if (err instanceof CustomError) {
-    const { status, message } = err;
-    res.status(status).json({ message: message });
-  }
-  console.log(err);
-  res.status(500).send({ message: "서버 오류" });
-  next();
-});
+// app.use((err, req, res, next) => {
+//   if (err instanceof CustomError) {
+//     const { status, message } = err;
+//     res.status(status).json({ message: message });
+//   }
+//   console.log(err);
+//   res.status(500).send({ message: "서버 오류" });
+//   next();
+// });
 app.listen(4000, async () => {
   console.log("Server is running on port 4000...");
 });
