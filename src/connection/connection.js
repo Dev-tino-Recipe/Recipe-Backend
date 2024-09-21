@@ -1,15 +1,16 @@
 import mysql from "mysql2/promise";
 import dotenv from "dotenv";
 dotenv.config();
-
 // 이 부분은 각자 설정에 맞게 조정
-const conn = mysql.createPool({
+export const options = {
   host: "127.0.0.1",
   port: 3306,
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_DATABASE,
-});
+};
+
+export const conn = mysql.createPool(options);
 
 export default {
   async query(queryString = "", params = []) {

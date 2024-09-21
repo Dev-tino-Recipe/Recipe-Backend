@@ -51,6 +51,7 @@ recipeController.post(
             instruction.description,
           );
         });
+        console.log(instructions);
       } else {
         throw new CustomError("Instructions must be an array.", 400);
       }
@@ -83,21 +84,21 @@ recipeController.post(
         throw new CustomError("레시피 등록에 실패했습니다.", 400);
       }
     } catch (e) {
-      console.error(e);
       next(e);
     }
   },
 );
 
-recipeController.get("/recipe/posted", async (req, res, next) => {
-  const { page, pageSize } = req.query;
+recipeController.get("/recheck", async (req, res, next) => {
+  const { page, pageSize, user_id } = req.query;
+  console.log(page, pageSize);
 
   try {
-    if (!req.user) {
-      return res.status(401).json({ message: "로그인이 필요합니다." });
-    }
+    // const user_id = req.session.userId;
 
-    const user_id = req.user.user_id;
+    // if (!req.user) {
+    //   throw new Error("로그인이 필요합니다.");
+    // }
 
     Positive("page", page);
     InRange("pageSize", pageSize, 1, 10);
@@ -115,7 +116,6 @@ recipeController.get("/recipe/posted", async (req, res, next) => {
       user_name: recipe.user_name,
       description: recipe.description,
     }));
-
     res.status(200).json({
       recipes: formattedRecipes,
       is_success: true,
@@ -148,6 +148,48 @@ recipeController.get("/detail/:recipeId", async (req, res, next) => {
 
 recipeController.post("/recipe/recent", async (req, res, next) => {
   try {
+  } catch (e) {
+    next(e);
+  }
+});
+
+recipeController.put("/post", async (req, res, next) => {
+  const {
+    recipe_id,
+    user_id,
+    title,
+    thumbnail,
+    description,
+    ingredients,
+    instructions,
+  } = req.body;
+  // console.log(
+  //   recipe_id,
+  //   user_id,
+  //   title,
+  //   thumbnail,
+  //   description,
+  //   ingredients,
+  //   instructions,
+  // );
+  try {
+    const updateRecipe = {
+      recipe_id,
+      user_id,
+      title,
+      thumbnail,
+      description,
+      ingredients,
+      instructions,
+    };
+    const result = await recipeRepository.recipeModify(updateRecipe);
+    if (result) {
+      res.status(200).json({
+        is_success: true,
+        message: "레시피 수정에 성공했습니다.",
+        recipe_id,
+      });
+    }
   } catch (e) {
     next(e);
   }
