@@ -11,6 +11,14 @@ export default {
     instructions,
   }) => {
     const recipe_id = generate_uuid();
+    console.log(
+      user_id,
+      title,
+      thumbnail,
+      description,
+      ingredients,
+      instructions,
+    );
     const ris = await conn.query(
       `INSERT INTO Recipes
         (
@@ -24,44 +32,36 @@ export default {
       [recipe_id, user_id, title, thumbnail, description],
     );
 
-    for (const ingredient of ingredients) {
-      await conn.query(
-        `INSERT INTO Ingredients
-            (
-                recipe_id,
-                name,
-                quantity
-            )
-            VALUES (?, ?, ?)`,
-        [recipe_id, ingredient.name, ingredient.quantity],
-      );
-    }
-    for (const instruction of instructions) {
-      await conn.query(
-        `INSERT INTO Instructions
-            (
-                recipe_id,
-                title,
-                img_url,
-                description,
-                step_order
-            )
-            VALUES (?, ?, ?, ?,?)`,
-        [
-          recipe_id,
-          instruction.title,
-          instruction.img_url,
-          instruction.description,
-          instruction.step_order,
-        ],
-      );
-    }
+    const ingredientValues = ingredients
+      .map(
+        (ingredient) =>
+          `(${conn.escape(recipe_id)}, ${conn.escape(ingredient.name)}, ${conn.escape(ingredient.quantity)})`,
+      )
+      .join(", ");
+
+    await conn.query(`
+        INSERT INTO Ingredients (recipe_id, name, quantity)
+        VALUES ${ingredientValues}
+    `);
+
+    const instructionValues = instructions
+      .map(
+        (instruction) =>
+          `(${conn.escape(recipe_id)}, ${conn.escape(instruction.title)}, ${conn.escape(instruction.img_url)}
+          ,${conn.escape(instruction.description)}, ${conn.escape(instruction.step_order)})`,
+      )
+      .join(", ");
+
+    await conn.query(`
+        INSERT INTO Instructions (recipe_id, title, img_url, description, step_order)
+        VALUES ${instructionValues}
+    `);
 
     return ris;
   },
 
   getPostedRecipesByPaging: async (user_id, page, pageSize) => {
-    const pageStr = ((page - 1) * pageSize).toString();
+    const skipSizeStr = (page - 1) * pageSize.toString();
     const pageSizeStr = pageSize.toString();
 
     return await conn.query(
@@ -70,7 +70,7 @@ export default {
         WHERE user_id = ?
             ORDER BY created_at DESC
         LIMIT ?, ?;`,
-      [user_id, pageStr, pageSizeStr],
+      [user_id, skipSizeStr, pageSizeStr],
     );
   },
 
