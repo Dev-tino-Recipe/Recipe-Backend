@@ -11,21 +11,28 @@ const authController = express.Router();
 
 authController.post("/signup", async (req, res, next) => {
   const { user_name, password } = req.body;
-
+  console.log(user_name, password);
   try {
     UserNameLengthCheck("userName", user_name);
     PasswordLengthCheck("password", password);
 
-    const result = await authRepository.singUp(user_name, password);
+    const result = await authRepository.signUp(user_name, password);
     if (result) {
-      res
-        .status(200)
-        .json({
-          is_success: true,
-          message: "계정이 성공적으로 생성되었습니다.",
-        });
+      res.status(200).json({
+        is_success: true,
+        message: "계정이 성공적으로 생성되었습니다.",
+      });
+    } else {
+      res.status(400).json({
+        is_success: false,
+        message: "계정 생성에 실패하였습니다.",
+      });
     }
   } catch (e) {
+    res.status(500).json({
+      is_success: false,
+      message: e.message || "서버 오류가 발생했습니다.",
+    });
     next(e);
   }
 });

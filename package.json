@@ -2,7 +2,6 @@
   "name": "recipe_project",
   "type": "module",
   "version": "1.0.0",
-  "description": "",
   "main": "index.js",
   "scripts": {
     "dev": "nodemon --watch index.js --watch src/",
@@ -26,5 +25,6 @@
     "prettier": "^3.3.3",
     "uuid": "10.0.0"
   },
-  "type": "module"
+  "devDependencies": {},
+  "description": ""
 }
