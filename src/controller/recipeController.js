@@ -39,7 +39,7 @@ recipeController.post(
         DescriptionLengthCheck("instruction", instruction.instruction);
       });
 
-      UserNameCheck(user_id);
+      await UserNameCheck(user_id);
 
       const finalThumbnail = data ? data.path : req.body.thumbnail;
 
