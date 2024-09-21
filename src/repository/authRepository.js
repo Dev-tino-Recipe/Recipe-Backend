@@ -46,7 +46,7 @@ export default {
 
   updateSessionId: async (user_id, session_id) => {
     await conn.query(
-      `update user
+      `update users
                                     SET session_id = ?
                                     where user_id = ?`,
       [user_id, session_id],
