@@ -6,6 +6,7 @@ import {
 import { UserNameCheck } from "../validator/auth.js";
 import authRepository from "../repository/authRepository.js";
 import CustomError from "../error/Error.js";
+import { comparePassword } from "../utils/passwordHash.js";
 
 const authController = express.Router();
 
@@ -16,14 +17,12 @@ authController.post("/signup", async (req, res, next) => {
     UserNameLengthCheck("userName", user_name);
     PasswordLengthCheck("password", password);
 
-    const result = await authRepository.singUp(user_name, password);
+    const result = await authRepository.signUp(user_name, password);
     if (result) {
-      res
-        .status(200)
-        .json({
-          is_success: true,
-          message: "계정이 성공적으로 생성되었습니다.",
-        });
+      res.status(200).json({
+        is_success: true,
+        message: "계정이 성공적으로 생성되었습니다.",
+      });
     }
   } catch (e) {
     next(e);
@@ -52,13 +51,14 @@ authController.post("/login", async (req, res, next) => {
   try {
     const user = await authRepository.userByCredentials(user_id);
     if (user) {
-      const isMatch = await bcrypt.compare(password, user.password);
+      const isMatch = await comparePassword(password, user[0].password);
+
       if (isMatch) {
         req.session.loggedIn = true;
-        req.seesion.userId = user_id;
-
-        const seesionId = req.sessionId;
-        await authRepository.updateSessionId(seesionId, password);
+        req.session.userId = user_id;
+        const sessionId = req.sessionId;
+        console.log(user_id, sessionId);
+        const auth = await authRepository.updateSessionId(user_id, sessionId);
 
         res.status(200).json({ message: "인증 성공" });
       } else {
@@ -67,7 +67,9 @@ authController.post("/login", async (req, res, next) => {
     } else {
       res.status(404).json({ message: "사용자를 찾을 수 없습니다." });
     }
-  } catch (e) {}
+  } catch (e) {
+    next(e);
+  }
 });
 
 export default authController;

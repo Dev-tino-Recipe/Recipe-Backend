@@ -12,6 +12,7 @@ const app = express();
 
 app.use(
   session({
+    key: "session_cookie_name",
     secret: "secret_key",
     resave: false,
     saveUninitialized: false,
@@ -23,10 +24,10 @@ app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use('/api/auth', authController);
-app.use('/api/recipe', recipeController);
-app.use('/api/img', imageController);
-app.use('/api/bookmark', bookmarkController);
+app.use("/api/auth", authController);
+app.use("/api/recipe", recipeController);
+app.use("/api/img", imageController);
+app.use("/api/bookmark", bookmarkController);
 
 // app.use((err, req, res, next) => {
 //   if (err instanceof CustomError) {
