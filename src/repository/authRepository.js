@@ -5,48 +5,59 @@ import { hashPassword } from "../utils/passwordHash.js";
 export default {
   signUp: async (user_name, password) => {
     const uuid = generate_uuid();
-    const pwd = hashPassword(password);
+    const pwd = await hashPassword(password);
     const res = await conn.query(
-      `
-            INSERT INTO Users
-            (
-            user_id,
-            user_name,
-            password
-            )
-            VALUES(
-                ?,
-                ?,
-                ?
-            )
-        `,
+      `INSERT INTO Users
+                (
+                user_id,
+                user_name,
+                password
+                )
+                VALUES(
+                    ?,
+                    ?,
+                    ?
+                )
+            `,
       [uuid, user_name, pwd],
     );
     return res;
   },
+
   findByUserName: async (user_name) => {
     const rows = await conn.query(`SELECT * FROM Users WHERE User_Name = ?`, [
       user_name,
     ]);
+    console.log(rows);
     return rows;
   },
 
-  userByCredentials: async (user_id, password) => {
+  userByCredentials: async (user_name) => {
     const credentials = await conn.query(
-      `SELECT * 
-                                                        FROM Users 
-                                                        where User_Name = ? and password = ?`,
-      [user_id, password],
+      `SELECT *
+                                                    FROM Users
+                                                    where User_Name = ?`,
+      [user_name],
     );
+    console.log(credentials);
     return credentials;
   },
 
   updateSessionId: async (user_id, session_id) => {
     await conn.query(
-      `update user
-                                    SET session_id = ?
-                                    where user_id = ?`,
-      [user_id, session_id],
+      `update users
+                                SET session_id = ?
+                                where user_id = ?`,
+      [session_id, user_id],
+    );
+  },
+
+  clearUserSessionId: async (user_id) => {
+    await conn.query(
+      `update users 
+                                    SET session_id = NULL 
+                                    WHERE user_id = ?`,
+      [user_id],
     );
   },
 };
