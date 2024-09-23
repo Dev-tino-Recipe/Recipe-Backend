@@ -14,6 +14,7 @@ import { upload_single } from "../aws/s3.js";
 import authRepository from "../repository/authRepository.js";
 import { v4 as generate_uuid } from "uuid";
 import recipeRepository from "../repository/recipeRepository.js";
+import { returnResponse } from "../utils/response.js";
 
 const recipeController = express.Router();
 
@@ -113,11 +114,15 @@ recipeController.get("/recheck", async (req, res, next) => {
       user_name: recipe.user_name,
       description: recipe.description,
     }));
-    res.status(200).json({
-      recipes: formattedRecipes,
-      is_success: true,
-      message: "등록한 레시피 조회에 성공했습니다.",
-    });
+    res
+      .status(200)
+      .json(
+        returnResponse(
+          true,
+          "등록한 레시피 조회에 성공했습니다.",
+          formattedRecipes,
+        ),
+      );
   } catch (e) {
     next(e);
   }
@@ -137,7 +142,9 @@ recipeController.get("/detail", async (req, res, next) => {
         result: result,
       });
     } else {
-      res.status(400).json({ message: "상세 레시피 조회가 실패했습니다.", result: result });
+      res
+        .status(400)
+        .json({ message: "상세 레시피 조회가 실패했습니다.", result: result });
     }
   } catch (e) {
     next(e);
@@ -148,21 +155,24 @@ recipeController.get("/recent", async (req, res, next) => {
   try {
     const { recipe_id } = req.body;
     const recipe_ids = recipe_id.map((value) => value.value);
-    const placeholder = recipe_id.map(()=> '?').join(', ');
+    const placeholder = recipe_id.map(() => "?").join(", ");
 
     // 최근 레시피 조회
-    const result = await recipeRepository.getRecentRecipe(recipe_ids, placeholder);
+    const result = await recipeRepository.getRecentRecipe(
+      recipe_ids,
+      placeholder,
+    );
 
     if (result.length) {
       res.status(200).json({
         isSuccess: true,
         message: "최근 본 레시피 조회에 성공했습니다",
-        result: result
+        result: result,
       });
     } else {
       res.status(404).json({
         isSuccess: false,
-        message: "최근 본 레시피가 없습니다."
+        message: "최근 본 레시피가 없습니다.",
       });
     }
   } catch (e) {
