@@ -5,10 +5,9 @@ import { hashPassword } from "../utils/passwordHash.js";
 export default {
   signUp: async (user_name, password) => {
     const uuid = generate_uuid();
-    const pwd = hashPassword(password);
-    pwd.then(async function (value) {
-      const res = await conn.query(
-        `
+    const pwd = await hashPassword(password);
+    const res = await conn.query(
+      `
             INSERT INTO Users
             (
             user_id,
@@ -21,10 +20,9 @@ export default {
                 ?
             )
         `,
-        [String(uuid), user_name, value],
-      );
-      return res;
-    });
+      [String(uuid), user_name, pwd],
+    );
+    return res;
   },
   findByUserName: async (user_name) => {
     const rows = await conn.query(`SELECT * FROM Users WHERE User_Name = ?`, [

@@ -16,7 +16,7 @@ authController.post("/signup", async (req, res, next) => {
     UserNameLengthCheck("userName", user_name);
     PasswordLengthCheck("password", password);
     const result = await authRepository.signUp(user_name, password);
-    if (result) {
+    if (result.affectedRows) {
       res.status(200).json({
         is_success: true,
         message: "계정이 성공적으로 생성되었습니다.",
