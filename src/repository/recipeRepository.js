@@ -1,5 +1,6 @@
 import conn from "../connection/connection.js";
 import { v4 as generate_uuid } from "uuid";
+import recipeController from "../controller/recipeController.js";
 
 export default {
   createRecipe: async ({
@@ -11,6 +12,7 @@ export default {
     instructions,
   }) => {
     const recipe_id = generate_uuid();
+
     const ris = await conn.query(
       `INSERT INTO Recipes
         (
@@ -26,27 +28,31 @@ export default {
 
     for (const ingredient of ingredients) {
       await conn.query(
-        `INSERT INTO Ingredients
-            (
-                recipe_id,
-                name,
-                quantity
-            )
-            VALUES (?, ?, ?)`,
+        `
+                INSERT INTO Ingredient
+                (
+                    recipe_id,
+                    name,
+                    quantity
+                )
+                VALUES (?, ?, ?)
+            `,
         [recipe_id, ingredient.name, ingredient.quantity],
       );
     }
     for (const instruction of instructions) {
       await conn.query(
-        `INSERT INTO Instructions
-            (
-                recipe_id,
-                title,
-                img_url,
-                description,
-                step_order
-            )
-            VALUES (?, ?, ?, ?,?)`,
+        `
+                INSERT INTO Instructions
+                (
+                    recipe_id,
+                    title,
+                    img_url,
+                    description,
+                    step_order
+                )
+                VALUES (?, ?, ?, ?,?)
+            `,
         [
           recipe_id,
           instruction.title,
@@ -61,7 +67,7 @@ export default {
   },
 
   getPostedRecipesByPaging: async (user_id, page, pageSize) => {
-    const pageStr = ((page - 1) * pageSize).toString();
+    const skipSizeStr = ((page - 1) * pageSize).toString();
     const pageSizeStr = pageSize.toString();
 
     return await conn.query(
@@ -70,17 +76,77 @@ export default {
         WHERE user_id = ?
             ORDER BY created_at DESC
         LIMIT ?, ?;`,
-      [user_id, pageStr, pageSizeStr],
+      [user_id, skipSizeStr, pageSizeStr],
     );
+  },
+
+  recipeModify: async ({
+    recipe_id,
+    title,
+    thumbnail,
+    description,
+    ingredients,
+    instructions,
+  }) => {
+    const ru = await conn.query(
+      `UPDATE Recipes SET title = ?, thumbnail = ?, description = ?, updated_at = CURRENT_TIMESTAMP() where recipe_id = ?;`,
+      [title, thumbnail, description, recipe_id],
+    );
+    await conn.query(`DELETE FROM ingredient WHERE recipe_id = ?;`, [
+      recipe_id,
+    ]);
+
+    await conn.query(`DELETE FROM instructions WHERE recipe_id = ?;`, [
+      recipe_id,
+    ]);
+
+    for (const ingredient of ingredients) {
+      await conn.query(
+        `
+                INSERT INTO Ingredient
+                (
+                    recipe_id,
+                    name,
+                    quantity
+                )
+                VALUES (?, ?, ?)
+            `,
+        [recipe_id, ingredient.name, ingredient.quantity],
+      );
+    }
+
+    for (const instruction of instructions) {
+      await conn.query(
+        `
+                INSERT INTO Instructions
+                (
+                    recipe_id,
+                    title,
+                    img_url,
+                    description,
+                    step_order
+                )
+                VALUES (?, ?, ?, ?,?)
+            `,
+        [
+          recipe_id,
+          instruction.title,
+          instruction.img_url,
+          instruction.description,
+          instruction.step_order,
+        ],
+      );
+    }
+    return ru;
   },
 
   getRecipe: async (recipeId) => {
     const res = await conn.query(
-      `SELECT title, img_url, description, step_order FROM Instructions WHERE recipeId = ?`,
+      `SELECT title, img_url, description, step_order FROM Instructions WHERE recipe_id = ?`,
       [recipeId],
     );
     const ret = await conn.query(
-      `SELECT name, quantity FROM Ingredient WHERE recipeId = ?`,
+      `SELECT name, quantity FROM Ingredient WHERE recipe_id = ?`,
       [recipeId],
     );
     const reu = await conn.query(
@@ -109,4 +175,12 @@ export default {
       })),
     };
   },
+  getRecentRecipe : async (recipeId, placeholder) => {
+    const sql = `SELECT thumbnail, title, description FROM Recipes WHERE recipe_id IN (${placeholder})`;
+
+    const res = await conn.query(
+        sql,recipeId
+    );
+    return res;
+  }
 };

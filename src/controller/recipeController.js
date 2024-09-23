@@ -22,32 +22,50 @@ recipeController.post(
   upload_single("image"),
   async (req, res, next) => {
     try {
-      const data = req.file;
-      const { user_id, title, description, ingredients, instructions } =
-        req.body;
+      const {
+        user_id,
+        title,
+        thumbnail,
+        description,
+        ingredients,
+        instructions,
+      } = req.body;
 
       TitleLengthCheck("title", title);
       DescriptionLengthCheck("description", description);
 
-      ingredients.forEach((ingredient) => {
-        NameLengthCheck("name", ingredient.name);
-        QuantityLengthCheck("quantity", ingredient.quantity);
-      });
+      if (Array.isArray(ingredients)) {
+        ingredients.forEach((ingredient) => {
+          NameLengthCheck("name", ingredient.name);
+          QuantityLengthCheck("quantity", ingredient.quantity);
+        });
+      } else {
+        throw new CustomError("Ingredients must be an array.", 400);
+      }
 
-      instructions.forEach((instruction) => {
-        TitleLengthCheck("instruction", instruction.name);
-        DescriptionLengthCheck("instruction", instruction.instruction);
-      });
+      if (Array.isArray(instructions)) {
+        instructions.forEach((instruction) => {
+          TitleLengthCheck("instruction title", instruction.title);
+          DescriptionLengthCheck(
+            "instruction description",
+            instruction.description,
+          );
+        });
+        console.log(instructions);
+      } else {
+        throw new CustomError("Instructions must be an array.", 400);
+      }
 
-      await UserNameCheck(user_id);
+      // UserNameCheck(user_id);
+      const recipe_id = generate_uuid();
 
-      const finalThumbnail = data ? data.path : req.body.thumbnail;
+      //const finalThumbnail = data ? data.path : req.body.thumbnail;
 
       const newRecipe = {
         recipe_id,
         user_id,
         title,
-        thumbnail: finalThumbnail,
+        thumbnail,
         description,
         ingredients,
         instructions,
@@ -57,11 +75,11 @@ recipeController.post(
       if (result) {
         res.status(200).json({
           is_success: true,
-          message: "레시피 등록에 성공적으로 생성되었습니다.",
+          message: "레시피 등록에 성공했습니다.",
           recipe_id,
         });
       } else {
-        // throw new CustomError("레시피 등록에 실패했습니다.", 400);
+        throw new CustomError("레시피 등록에 실패했습니다.", 400);
       }
     } catch (e) {
       next(e);
@@ -69,10 +87,16 @@ recipeController.post(
   },
 );
 
-recipeController.get("/recipe/posted", async (req, res, next) => {
-  const { page, pageSize } = req.query;
-  const user_id = req.user.user_id;
+recipeController.get("/recheck", async (req, res, next) => {
+  const { page, pageSize, user_id } = req.query;
+
   try {
+    // const user_id = req.session.userId;
+
+    // if (!req.user) {
+    //   throw new Error("로그인이 필요합니다.");
+    // }
+
     Positive("page", page);
     InRange("pageSize", pageSize, 1, 10);
 
@@ -89,28 +113,21 @@ recipeController.get("/recipe/posted", async (req, res, next) => {
       user_name: recipe.user_name,
       description: recipe.description,
     }));
-    if (formattedRecipes.length > 0) {
-      res.status(200).json({
-        recipes: formattedRecipes,
-        is_success: true,
-        message: "등록한 레시피 조회에 성공했습니다.",
-      });
-    } else {
-      res.status(200).json({
-        recipes: [],
-        is_success: false,
-        message: "등록한 레시피가 없습니다.",
-      });
-    }
+    res.status(200).json({
+      recipes: formattedRecipes,
+      is_success: true,
+      message: "등록한 레시피 조회에 성공했습니다.",
+    });
   } catch (e) {
     next(e);
   }
 });
 
-recipeController.get("/detail/:recipeId", async (req, res, next) => {
+recipeController.get("/detail", async (req, res, next) => {
   try {
-    const { recipeId } = req.params;
-    const result = await recipeRepository.getRecipe(recipeId);
+    const { recipe_id } = req.query;
+    // console.log(recipe_id);
+    const result = await recipeRepository.getRecipe(recipe_id);
     if (result.length) {
       res.status(200).json({
         isMine: false,
@@ -120,15 +137,76 @@ recipeController.get("/detail/:recipeId", async (req, res, next) => {
         result: result,
       });
     } else {
-      res.status(400).json({ message: "레시피가 없습니다.", result: result });
+      res.status(400).json({ message: "상세 레시피 조회가 실패했습니다.", result: result });
     }
   } catch (e) {
     next(e);
   }
 });
 
-recipeController.post("/recipe/recent", async (req, res, next) => {
+recipeController.get("/recent", async (req, res, next) => {
   try {
+    const { recipe_id } = req.body;
+    const recipe_ids = recipe_id.map((value) => value.value);
+    const placeholder = recipe_id.map(()=> '?').join(', ');
+
+    // 최근 레시피 조회
+    const result = await recipeRepository.getRecentRecipe(recipe_ids, placeholder);
+
+    if (result.length) {
+      res.status(200).json({
+        isSuccess: true,
+        message: "최근 본 레시피 조회에 성공했습니다",
+        result: result
+      });
+    } else {
+      res.status(404).json({
+        isSuccess: false,
+        message: "최근 본 레시피가 없습니다."
+      });
+    }
+  } catch (e) {
+    next(e);
+  }
+});
+
+recipeController.put("/post", async (req, res, next) => {
+  const {
+    recipe_id,
+    user_id,
+    title,
+    thumbnail,
+    description,
+    ingredients,
+    instructions,
+  } = req.body;
+  // console.log(
+  //   recipe_id,
+  //   user_id,
+  //   title,
+  //   thumbnail,
+  //   description,
+  //   ingredients,
+  //   instructions,
+  // );
+  try {
+    const updateRecipe = {
+      recipe_id,
+      user_id,
+      title,
+      thumbnail,
+      description,
+      ingredients,
+      instructions,
+    };
+    const result = await recipeRepository.recipeModify(updateRecipe);
+    if (result) {
+      res.status(200).json({
+        is_success: true,
+        message: "레시피 수정에 성공했습니다.",
+        recipe_id,
+      });
+    }
   } catch (e) {
     next(e);
   }
