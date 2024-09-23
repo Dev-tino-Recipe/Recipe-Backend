@@ -27,29 +27,41 @@ export default {
     });
   },
   findByUserName: async (user_name) => {
-    const rows = await conn.query(`SELECT * FROM Users WHERE User_Name = ?`, [
-      user_name,
-    ]);
+    const rows = await conn.query(
+      `SELECT * 
+                 FROM Users 
+                 WHERE User_Name = ?`,
+      [user_name],
+    );
     return rows;
   },
 
-  userByCredentials: async (user_id) => {
-    console.log();
+  userByCredentials: async (user_name) => {
     const credentials = await conn.query(
-      `SELECT * 
-                                                        FROM Users 
-                                                        where User_Name = ?`,
-      [user_id],
+      `SELECT *
+                 FROM Users
+                 where User_Name = ?`,
+      [user_name],
     );
+    console.log(credentials);
     return credentials;
   },
 
   updateSessionId: async (user_id, session_id) => {
     await conn.query(
       `update users
-                                    SET session_id = ?
-                                    where user_id = ?`,
-      [user_id, session_id],
+                 SET session_id = ?
+                 where user_id = ?`,
+      [session_id, user_id],
+    );
+  },
+
+  clearUserSessionId: async (user_id) => {
+    await conn.query(
+      `update users 
+                 SET session_id = NULL 
+                 WHERE user_id = ?`,
+      [user_id],
     );
   },
 };
