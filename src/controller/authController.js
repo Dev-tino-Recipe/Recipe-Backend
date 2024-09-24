@@ -1,5 +1,5 @@
 import express from "express";
-import {validPassword, validUsername} from "../validator/auth.js";
+import {duplicateUsername, validPassword, validUsername} from "../validator/auth.js";
 import userRepository from "../repository/userRepository.js";
 import apiResponse from "../dto/apiResponse.js";
 
@@ -26,15 +26,15 @@ authController.post("/signup", async (req, res, next) => {
 
 authController.post("/duplicate", async (req, res, next) => {
   try {
-    const {user_name} = req.body;
-    await UserNameCheck("user_name", user_name);
-
+    const {username} = req.body;
+    await duplicateUsername('username', username)
     res
         .status(200)
-        .json({isSuccess: true, message: "사용가능한 아이디입니다."});
+        .json(
+            apiResponse.success({message: "사용 가능한 유저 이름입니다."})
+        );
   } catch (e) {
     next(e);
-    // throw new CustomError("조회과정에서 문제가 생겼습니다.", 400);
   }
 });
 
