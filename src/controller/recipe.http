@@ -1,0 +1,35 @@
+### GET request to example server
+POST http://localhost:4000/api/recipe/regist
+Content-Type: application/json
+
+{
+  "userId": "3e63d11c-074f-48a6-af22-f1bda2e42c62",
+  "title": "123456789",
+  "thumbnail": "123456789",
+  "description": "1234567890",
+  "ingredients": [
+    {
+      "name": "123456789",
+      "quantity": "123456789"
+    },
+    {
+      "name": "123456789",
+      "quantity": "123456789"
+    }
+  ],
+  "instructions": [
+    {
+      "title": "123456789",
+      "imgUrl": "123456789",
+      "description": "1234567890"
+    },
+    {
+      "title": "123456789",
+      "imgUrl": "123456789",
+      "description": "1234567890"
+    }
+  ]
+}
+
+###
+GET http://localhost:4000/api/recipe/detail?recipeId=f363a5f0-ed6d-4eeb-be52-154741b07017
