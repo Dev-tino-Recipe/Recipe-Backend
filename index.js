@@ -12,7 +12,12 @@ import errorHandler from "./src/middlewares/errorHandler.js";
 const app = express();
 
 app.use(session);
-app.use(cors())
+
+// 세션 CORS 설정
+app.use(cors({
+  origin : ["http://localhost:3000", "*"],
+  credentials: true,
+}))
 
 app.use(logger("dev"));
 

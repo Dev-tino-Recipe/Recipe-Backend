@@ -1,6 +1,6 @@
 import session from "express-session";
 import MySQLStore from "express-mysql-session";
-import { conn } from "./connection.js";
+import {conn} from "./connection.js";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -17,4 +17,12 @@ const sessionOption = {
   store: sessionStore,
 };
 
-export default session(sessionOption);
+export default session({
+  ...sessionOption,
+  cookie: {
+    httpOnly: true,
+    secure: false,
+    maxAge: 1000 * 60 * 60 * 24 * 7,
+    sameSite: "Lax",
+  }
+});
