@@ -5,17 +5,19 @@ import recipeController from "./src/controller/recipeController.js";
 import imageController from "./src/controller/imageController.js";
 import bookmarkController from "./src/controller/bookmarkController.js";
 import session from "./src/db/session.js";
-import { initDB } from "./src/db/connection.js";
+import {initDB} from "./src/db/connection.js";
+import cors from "cors";
 import errorHandler from "./src/middlewares/errorHandler.js";
 
 const app = express();
 
 app.use(session);
+app.use(cors())
 
 app.use(logger("dev"));
 
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({extended: true}));
 
 app.use("/api/auth", authController);
 app.use("/api/recipe", recipeController);
