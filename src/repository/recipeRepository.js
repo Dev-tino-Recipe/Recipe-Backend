@@ -2,64 +2,100 @@ import conn, {transaction} from "../db/connection.js";
 import {v4 as uuid} from "uuid";
 
 export default {
-  createRecipe: async (
-      {
-        userId,
-        title,
-        thumbnail,
-        description,
-        ingredients,
-        instructions,
-      }
+  save: async (
+      userId,
+      title,
+      thumbnail,
+      description,
+      connection
   ) => {
-    return await transaction(async (conn) => {
-      const recipeId = uuid();
+    const recipeId = uuid();
 
-      const recipeSql = `
-          INSERT INTO recipes
-              (recipeId, userId, title, thumbnail, description)
-          values (?, ?, ?, ?, ?)
-      `
+    const recipeSql = `
+        INSERT INTO recipes
+            (recipeId, userId, title, thumbnail, description)
+        values (?, ?, ?, ?, ?)
+    `
 
-      const [row] = await conn.execute(recipeSql, [recipeId, userId, title, thumbnail, description]);
+    await conn.query(recipeSql, [recipeId, userId, title, thumbnail, description], connection);
 
-      const ingredientsSql = `
-          INSERT INTO ingredient
-              (recipeId, name, quantity)
-          values ${ingredients.map(() => "(?, ?, ?)")}
-      `
-
-      await conn.execute(ingredientsSql, ingredients.map(({name, quantity}) => {
-        return [recipeId, name, quantity];
-      }).flat())
-
-      const instructionSql = `
-          INSERT INTO instructions
-              (recipeId, title, imgUrl, description, stepOrder)
-          values ${instructions.map(() => "(?, ?, ?, ?, ?)")}
-      `
-      await conn.execute(instructionSql, instructions.map(({title, imgUrl, description}, idx) => {
-        return [recipeId, title, imgUrl ?? null, description, idx + 1];
-      }).flat())
-
-      return row;
-    })
+    return recipeId;
   },
 
-  // getPostedRecipesByPaging: async (user_id, page, pageSize) => {
-  //   const skipSizeStr = ((page - 1) * pageSize).toString();
-  //   const pageSizeStr = pageSize.toString();
-  //
-  //   return await conn.query(
-  //       `SELECT *
-  //        FROM recipes
-  //        WHERE user_id = ?
-  //        ORDER BY created_at DESC
-  //        LIMIT ?, ?;`,
-  //       [user_id, skipSizeStr, pageSizeStr],
-  //   );
-  // },
-  //
+  findByUserId: async (userId, page, pageSize) => {
+    const skipStr = ((page - 1) * pageSize).toString();
+    const pageSizeStr = pageSize.toString();
+
+    const sql = `
+        SELECT *
+        FROM recipes
+        WHERE userId = ?
+        ORDER BY createdAt DESC
+        LIMIT ?, ?;
+    `
+
+    return await conn.query(sql, [userId, skipStr, pageSizeStr]);
+  },
+
+  findById: async (recipeId) => {
+    const instructionsSql = `
+        SELECT title, imgUrl, description, stepOrder
+        FROM instructions
+        WHERE recipeId = ?
+    `
+    const findInstructions = await conn.query(instructionsSql, [recipeId]);
+
+    const ingredientSql = `
+        SELECT name, quantity
+        FROM ingredient
+        WHERE recipeId = ?
+        order by name
+    `
+    const findIngredients = await conn.query(ingredientSql, [recipeId]);
+
+    const recipeSql = `
+        select *
+        from recipes
+        where recipeId = ?
+    `
+    const findRecipe = await conn.query(recipeSql, [recipeId]);
+
+    const findUser = await conn.query(`
+    
+    `);
+
+
+    const reu = await conn.query(
+        `SELECT r.title as title, r.description as description, r.created_at as created_at, u.user_name as user_name
+         FROM recipes as r
+                  LEFT JOIN users as u on u.user_id = r.user_id
+         WHERE r.recipe_id = ?`,
+        [recipeId],
+    );
+
+    return {
+      recipeDetails: {
+        title: reu[0].title,
+        description: reu[0].description,
+        created_at: reu[0].created_at,
+        user: {
+          user_name: reu[0].user_name,
+        },
+      },
+      instructions: res.map((row) => ({
+        title: row.title,
+        imgUrl: row.img_url,
+        description: row.description,
+        step_order: row.step_order,
+      })),
+      ingredients: ret.map((row) => ({
+        name: row.name,
+        quantity: row.quantity,
+      })),
+    };
+  }
+
+
   // recipeModify: async ({
   //                        recipe_id,
   //                        title,
@@ -126,7 +162,8 @@ export default {
   //   }
   //   return ru;
   // },
-  //
+
+
   // getRecipe: async (recipeId) => {
   //   const res = await conn.query(
   //       `SELECT title, img_url, description, step_order

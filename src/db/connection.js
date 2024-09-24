@@ -18,8 +18,8 @@ export const conn = mysql2.createPool({
 });
 
 export default {
-  async query(queryString = "", params = []) {
-    const [rows] = await conn.execute(queryString, params);
+  async query(queryString = "", params = [], connection) {
+    const [rows] = await (connection ?? conn).execute(queryString, params);
     return rows;
   },
 };

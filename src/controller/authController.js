@@ -13,7 +13,7 @@ authController.post("/signup", async (req, res, next) => {
     await validUsername("username", username)
     validPassword("password", password);
 
-    await userRepository.createUser(username, password);
+    await userRepository.save(username, password);
 
     res.status(200).json(
         apiResponse.success({
@@ -67,23 +67,23 @@ authController.post("/login", async (req, res, next) => {
   }
 });
 
-authController.post("/logout", async (req, res, next) => {
-  try {
-    const currentUserId = req.session.userId;
-
-    if (!currentUserId) {
-      return res.status(401).json({message: "로그인하지 않은 사용자입니다."});
-    }
-    await authRepository.clearUserSessionId(currentUserId);
-
-    await req.session.destroy();
-
-    res.clearCookie("session_cookie_name", {path: "/"});
-
-    res.status(200).json({message: "로그아웃 성공"});
-  } catch (e) {
-    next(e);
-  }
-});
+// authController.post("/logout", async (req, res, next) => {
+//   try {
+//     const currentUserId = req.session.userId;
+//
+//     if (!currentUserId) {
+//       return res.status(401).json({message: "로그인하지 않은 사용자입니다."});
+//     }
+//     await authRepository.clearUserSessionId(currentUserId);
+//
+//     await req.session.destroy();
+//
+//     res.clearCookie("session_cookie_name", {path: "/"});
+//
+//     res.status(200).json({message: "로그아웃 성공"});
+//   } catch (e) {
+//     next(e);
+//   }
+// });
 
 export default authController;

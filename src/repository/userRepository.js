@@ -3,13 +3,15 @@ import conn from "../db/connection.js";
 import {hash} from "../utils/auth.js";
 
 export default {
-  createUser: async (username, password) => {
+  save: async (username, password) => {
+    let userId = uuid();
     const hashedPassword = await hash(password);
     const sql = `
         INSERT INTO users(userId, username, password)
         VALUES (?, ?, ?)
     `
-    await conn.query(sql, [uuid(), username, hashedPassword]);
+    await conn.query(sql, [userId, username, hashedPassword]);
+    return userId;
   },
 
   findByUserId: async (userId) => {
