@@ -1,6 +1,6 @@
 import express from "express";
 import {
-  validRecipeDescription,
+  validRecipeDescription, validRecipeId,
   validRecipeIngredients,
   validRecipeInstructions,
   validRecipeTitle
@@ -12,6 +12,8 @@ import {InRange, Positive} from "../validator/common.js";
 import {transaction} from "../db/connection.js";
 import ingredientRepository from "../repository/ingredientRepository.js";
 import instructionRepository from "../repository/instructionRepository.js";
+import userRepository from "../repository/userRepository.js";
+import recipeConverter from "../dto/recipeConverter.js";
 
 const recipeController = express.Router();
 
@@ -54,6 +56,7 @@ recipeController.post(
 
           return recipeId;
         });
+        // 트랜젝션 종료
 
         res.status(200).json(
             apiResponse.success({
@@ -97,57 +100,23 @@ recipeController.get("/recheck", async (req, res, next) => {
   }
 });
 
-// recipeController.get("/detail", async (req, res, next) => {
-//   try {
-//     const {recipe_id} = req.query;
-//     // console.log(recipe_id);
-//     const result = await recipeRepository.getRecipe(recipe_id);
-//     if (result) {
-//       res.status(200).json({
-//         isMine: false,
-//         isBookMarked: true,
-//         isSuccess: true,
-//         message: "상세 레시피가 정상 조회되었습니다.",
-//         result,
-//       });
-//     } else {
-//       res
-//           .status(400)
-//           .json({message: "상세 레시피 조회가 실패했습니다.", result});
-//     }
-//   } catch (e) {
-//     next(e);
-//   }
-// });
+recipeController.get("/detail", async (req, res, next) => {
+  try {
+    const {recipeId} = req.query;
+    await validRecipeId("recipeId", recipeId);
 
-// recipeController.get("/recent", async (req, res, next) => {
-//   try {
-//     const {recipe_id} = req.body;
-//     const recipe_ids = recipe_id.map((value) => value.value);
-//     const placeholder = recipe_id.map(() => "?").join(", ");
-//
-//     // 최근 레시피 조회
-//     const result = await recipeRepository.getRecentRecipe(
-//         recipe_ids,
-//         placeholder,
-//     );
-//
-//     if (result.length) {
-//       res.status(200).json({
-//         isSuccess: true,
-//         message: "최근 본 레시피 조회에 성공했습니다",
-//         result: result,
-//       });
-//     } else {
-//       res.status(404).json({
-//         isSuccess: false,
-//         message: "최근 본 레시피가 없습니다.",
-//       });
-//     }
-//   } catch (e) {
-//     next(e);
-//   }
-// });
+    const findRecipe = await recipeRepository.findById(recipeId);
+
+    const result = await recipeConverter.toRecipeDetail(findRecipe)
+
+    res.status(200).json({
+      message: "상세 레시피가 정상 조회되었습니다.",
+      result,
+    });
+  } catch (e) {
+    next(e);
+  }
+});
 
 // recipeController.put("/post", async (req, res, next) => {
 //   const {

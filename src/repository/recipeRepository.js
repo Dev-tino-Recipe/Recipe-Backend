@@ -1,4 +1,4 @@
-import conn, {transaction} from "../db/connection.js";
+import conn from "../db/connection.js";
 import {v4 as uuid} from "uuid";
 
 export default {
@@ -22,7 +22,7 @@ export default {
     return recipeId;
   },
 
-  findByUserId: async (userId, page, pageSize) => {
+  findByUserId: async (userId, page, pageSize, connection) => {
     const skipStr = ((page - 1) * pageSize).toString();
     const pageSizeStr = pageSize.toString();
 
@@ -34,65 +34,50 @@ export default {
         LIMIT ?, ?;
     `
 
-    return await conn.query(sql, [userId, skipStr, pageSizeStr]);
+    return await conn.query(sql, [userId, skipStr, pageSizeStr], connection);
   },
 
-  findById: async (recipeId) => {
-    const instructionsSql = `
-        SELECT title, imgUrl, description, stepOrder
-        FROM instructions
-        WHERE recipeId = ?
-    `
-    const findInstructions = await conn.query(instructionsSql, [recipeId]);
-
-    const ingredientSql = `
-        SELECT name, quantity
-        FROM ingredient
-        WHERE recipeId = ?
-        order by name
-    `
-    const findIngredients = await conn.query(ingredientSql, [recipeId]);
-
+  findById: async (recipeId, connection) => {
     const recipeSql = `
         select *
         from recipes
         where recipeId = ?
     `
-    const findRecipe = await conn.query(recipeSql, [recipeId]);
+    return (await conn.query(recipeSql, [recipeId], connection))[0];
 
-    const findUser = await conn.query(`
-    
-    `);
+    // const findUser = await conn.query(`
+    //
+    // `);
+    //
+    //
+    // const reu = await conn.query(
+    //     `SELECT r.title as title, r.description as description, r.created_at as created_at, u.user_name as user_name
+    //      FROM recipes as r
+    //               LEFT JOIN users as u on u.user_id = r.user_id
+    //      WHERE r.recipe_id = ?`,
+    //     [recipeId],
+    // );
 
-
-    const reu = await conn.query(
-        `SELECT r.title as title, r.description as description, r.created_at as created_at, u.user_name as user_name
-         FROM recipes as r
-                  LEFT JOIN users as u on u.user_id = r.user_id
-         WHERE r.recipe_id = ?`,
-        [recipeId],
-    );
-
-    return {
-      recipeDetails: {
-        title: reu[0].title,
-        description: reu[0].description,
-        created_at: reu[0].created_at,
-        user: {
-          user_name: reu[0].user_name,
-        },
-      },
-      instructions: res.map((row) => ({
-        title: row.title,
-        imgUrl: row.img_url,
-        description: row.description,
-        step_order: row.step_order,
-      })),
-      ingredients: ret.map((row) => ({
-        name: row.name,
-        quantity: row.quantity,
-      })),
-    };
+    // return {
+    //   recipeDetails: {
+    //     title: reu[0].title,
+    //     description: reu[0].description,
+    //     created_at: reu[0].created_at,
+    //     user: {
+    //       user_name: reu[0].user_name,
+    //     },
+    //   },
+    //   instructions: res.map((row) => ({
+    //     title: row.title,
+    //     imgUrl: row.img_url,
+    //     description: row.description,
+    //     step_order: row.step_order,
+    //   })),
+    //   ingredients: ret.map((row) => ({
+    //     name: row.name,
+    //     quantity: row.quantity,
+    //   })),
+    // };
   }
 
 

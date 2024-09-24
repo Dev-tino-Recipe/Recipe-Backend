@@ -1,5 +1,14 @@
 import {BlankCheck, LengthCheck} from "./common.js";
 import CustomError from "../error/Error.js";
+import recipeRepository from "../repository/recipeRepository.js";
+
+export const validRecipeId = async (key, value)=> {
+  BlankCheck(key, value)
+  const findRecipe = await  recipeRepository.findById(value);
+  if(!findRecipe) {
+    throw new CustomError(`${key}에 해당하는 레시피가 없습니다.`, 400);
+  }
+}
 
 export const validRecipeTitle = (key, value) => {
   try {
