@@ -1,29 +1,24 @@
 import express from "express";
-import {
-  UserNameLengthCheck,
-  PasswordLengthCheck,
-} from "../validator/common.js";
-import { UserNameCheck } from "../validator/auth.js";
-import authRepository from "../repository/authRepository.js";
-import CustomError from "../error/Error.js";
-import { comparePassword } from "../utils/passwordHash.js";
+import {validPassword, validUsername} from "../validator/auth.js";
+import userRepository from "../repository/userRepository.js";
+import apiResponse from "../dto/apiResponse.js";
 
 const authController = express.Router();
 
 authController.post("/signup", async (req, res, next) => {
-  const { user_name, password } = req.body;
+  const {username, password} = req.body;
 
   try {
-    UserNameLengthCheck("userName", user_name);
-    PasswordLengthCheck("password", password);
+    await validUsername("username", username)
+    validPassword("password", password);
 
-    const result = await authRepository.signUp(user_name, password);
-    if (result.affectedRows) {
-      res.status(200).json({
-        is_success: true,
-        message: "계정이 성공적으로 생성되었습니다.",
-      });
-    }
+    await userRepository.createUser(username, password);
+
+    res.status(200).json(
+        apiResponse.success({
+          message: "계정이 성공적으로 생성되었습니다."
+        })
+    );
   } catch (e) {
     next(e);
   }
@@ -31,12 +26,12 @@ authController.post("/signup", async (req, res, next) => {
 
 authController.post("/duplicate", async (req, res, next) => {
   try {
-    const { user_name } = req.body;
+    const {user_name} = req.body;
     await UserNameCheck("user_name", user_name);
 
     res
-      .status(200)
-      .json({ isSuccess: true, message: "사용가능한 아이디입니다." });
+        .status(200)
+        .json({isSuccess: true, message: "사용가능한 아이디입니다."});
   } catch (e) {
     next(e);
     // throw new CustomError("조회과정에서 문제가 생겼습니다.", 400);
@@ -44,7 +39,7 @@ authController.post("/duplicate", async (req, res, next) => {
 });
 
 authController.post("/login", async (req, res, next) => {
-  const { user_name, password } = req.body;
+  const {user_name, password} = req.body;
 
   try {
     const users = await authRepository.userByCredentials(user_name);
@@ -58,12 +53,12 @@ authController.post("/login", async (req, res, next) => {
         const sessionId = req.sessionID;
         await authRepository.updateSessionId(user.user_id, sessionId);
 
-        res.status(200).json({ message: "인증 성공" });
+        res.status(200).json({message: "인증 성공"});
       } else {
-        res.status(401).json({ message: "비밀번호가 일치하지 않습니다." });
+        res.status(401).json({message: "비밀번호가 일치하지 않습니다."});
       }
     } else {
-      res.status(404).json({ message: "사용자를 찾을 수 없습니다." });
+      res.status(404).json({message: "사용자를 찾을 수 없습니다."});
     }
   } catch (e) {
     next(e);
@@ -75,15 +70,15 @@ authController.post("/logout", async (req, res, next) => {
     const currentUserId = req.session.userId;
 
     if (!currentUserId) {
-      return res.status(401).json({ message: "로그인하지 않은 사용자입니다." });
+      return res.status(401).json({message: "로그인하지 않은 사용자입니다."});
     }
     await authRepository.clearUserSessionId(currentUserId);
 
     await req.session.destroy();
 
-    res.clearCookie("session_cookie_name", { path: "/" });
+    res.clearCookie("session_cookie_name", {path: "/"});
 
-    res.status(200).json({ message: "로그아웃 성공" });
+    res.status(200).json({message: "로그아웃 성공"});
   } catch (e) {
     next(e);
   }

@@ -7,11 +7,11 @@ dotenv.config();
 
 const sessionStore = new (MySQLStore(session))({}, conn);
 
-console.log("process.env.SESSION_SECRET", process.env.SESSION_SECRET);
+console.log("process.env.SECRET_KEY", process.env.SECRET_KEY);
 
 const sessionOption = {
   key: "session_cookie_name",
-  secret: process.env.SESSION_SECRET,
+  secret: process.env.SECRET_KEY,
   resave: false,
   saveUninitialized: false,
   store: sessionStore,

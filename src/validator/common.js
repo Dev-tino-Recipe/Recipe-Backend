@@ -1,12 +1,18 @@
 import CustomError from "../error/Error.js";
 
 export const BlankCheck = (key, value) => {
-  try {
-  } catch (e) {}
-  if (typeof value === "undefined") {
+  if (typeof value === "undefined" || value === null || value === "") {
     throw new CustomError(`${key}는 필수입니다.`, 400);
   }
 };
+
+export const LengthCheck = (key, value, min, max) => {
+  BlankCheck(key, value);
+  if (min <= value.length && value.length <= max) {
+    return;
+  }
+  throw new CustomError(`${key}는 ${min}이상 ${max}이하 입니다.`, 400);
+}
 
 export const UserNameLengthCheck = (key, value) => {
   try {
@@ -16,17 +22,6 @@ export const UserNameLengthCheck = (key, value) => {
     }
   } catch (e) {
     throw new CustomError(`${key}는 4이상 12이하여야 합니다.`);
-  }
-};
-
-export const PasswordLengthCheck = (key, value) => {
-  try {
-    BlankCheck(key, value);
-    if (8 > value.length || 15 < value.length) {
-      throw new Error(`${key}는 8이상 15이하여야 합니다.`);
-    }
-  } catch (e) {
-    throw new Error(`${key}는 8이상 15이하여야 합니다.`);
   }
 };
 

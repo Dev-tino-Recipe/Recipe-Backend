@@ -5,8 +5,8 @@ import recipeController from "./src/controller/recipeController.js";
 import imageController from "./src/controller/imageController.js";
 import bookmarkController from "./src/controller/bookmarkController.js";
 import session from "./src/db/session.js";
-import errorInterceptor from "./src/middlewares/error.interceptor.js";
 import { initDB } from "./src/db/connection.js";
+import errorHandler from "./src/middlewares/errorHandler.js";
 
 const app = express();
 
@@ -22,7 +22,7 @@ app.use("/api/recipe", recipeController);
 app.use("/api/img", imageController);
 app.use("/api/bookmark", bookmarkController);
 
-app.use(errorInterceptor);
+app.use(errorHandler);
 
 app.listen(4000, async () => {
   // 테이블 생성
