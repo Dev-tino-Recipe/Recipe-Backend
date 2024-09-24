@@ -2,6 +2,7 @@ import express from "express";
 import {duplicateUsername, validPassword, validUsername} from "../validator/auth.js";
 import userRepository from "../repository/userRepository.js";
 import apiResponse from "../dto/apiResponse.js";
+import {BlankCheck} from "../validator/common.js";
 
 const authController = express.Router();
 
@@ -39,27 +40,28 @@ authController.post("/duplicate", async (req, res, next) => {
 });
 
 authController.post("/login", async (req, res, next) => {
-  const {user_name, password} = req.body;
+  const {username, password} = req.body;
 
   try {
-    const users = await authRepository.userByCredentials(user_name);
-    const user = users.length > 0 ? users[0] : null;
-    if (user) {
-      const isMatch = await comparePassword(password, user.password);
-      if (isMatch) {
-        req.session.loggedIn = true;
-        req.session.userId = user.user_id;
+    BlankCheck("username", username);
+    BlankCheck("password", password);
+    const findUser = await userRepository.findByUsernameAndPassword(username, password);
 
-        const sessionId = req.sessionID;
-        await authRepository.updateSessionId(user.user_id, sessionId);
-
-        res.status(200).json({message: "인증 성공"});
-      } else {
-        res.status(401).json({message: "비밀번호가 일치하지 않습니다."});
-      }
-    } else {
-      res.status(404).json({message: "사용자를 찾을 수 없습니다."});
+    // 로그인 정보가 없다면
+    if (!findUser) {
+      return res.status(401).json(
+          apiResponse.failure({message: "아디이 혹은 비밀번호가 잘못 되었습니다."})
+      );
     }
+
+    // 로그인 성공 로직 => 세션에 로그인 정보 저장, 세션 아이디 업데이트
+    req.session.loggedIn = true;
+    req.session.userId = findUser.userId;
+    await userRepository.updateSessionIdByUserId(findUser.userId, req.sessionID);
+
+    res.status(200).json(
+        apiResponse.success({message: "인증 성공"})
+    );
   } catch (e) {
     next(e);
   }

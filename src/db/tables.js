@@ -3,7 +3,7 @@ export default {
       CREATE TABLE IF NOT EXISTS users
       (
           userId    char(36) PRIMARY KEY,
-          username  varchar(12)  not null,
+          username  varchar(12)  not null unique,
           password  varchar(100) not null,
           sessionId char(100)             default null,
           createdAt timestamp    not null default current_timestamp()

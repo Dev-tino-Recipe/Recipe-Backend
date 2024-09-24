@@ -30,6 +30,16 @@ export default {
     return (await conn.query(sql, [username]))[0];
   },
 
+  findByUsernameAndPassword: async (username, password) => {
+    const sql = `
+        select *
+        from users
+        where username = ?
+          and password = ?
+    `
+    return (await conn.query(sql, [username, await hash(password)]))[0];
+  },
+
   updateSessionIdByUserId: async (userId, sessionId) => {
     const sql = `
         update users
