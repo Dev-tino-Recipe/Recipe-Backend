@@ -1,8 +1,9 @@
 import express from "express";
-import {duplicateUsername, validPassword, validUsername} from "../validator/auth.js";
+import {validPassword, validUsername} from "../validator/auth.js";
 import userRepository from "../repository/userRepository.js";
 import apiResponse from "../dto/apiResponse.js";
 import {BlankCheck} from "../validator/common.js";
+import userConverter from "../dto/userConverter.js";
 
 const authController = express.Router();
 
@@ -25,10 +26,19 @@ authController.post("/signup", async (req, res, next) => {
   }
 });
 
+authController.get("/user", async (req, res, next) => {
+  res.json(
+      apiResponse.success({
+        message: "",
+        result: {user: userConverter.toUserDetail(req.session.user)}
+      })
+  );
+})
+
 authController.post("/duplicate", async (req, res, next) => {
   try {
     const {username} = req.body;
-    await duplicateUsername('username', username)
+    await validUsername('username', username)
     res
         .status(200)
         .json(
@@ -56,34 +66,39 @@ authController.post("/login", async (req, res, next) => {
 
     // 로그인 성공 로직 => 세션에 로그인 정보 저장, 세션 아이디 업데이트
     req.session.loggedIn = true;
-    req.session.userId = findUser.userId;
+    req.session.user = findUser;
     await userRepository.updateSessionIdByUserId(findUser.userId, req.sessionID);
 
     res.status(200).json(
-        apiResponse.success({message: "인증 성공"})
+        apiResponse.success({
+          message: "인증 성공",
+          result: {
+            userId: findUser.userId
+          }
+        })
     );
   } catch (e) {
     next(e);
   }
 });
 
-// authController.post("/logout", async (req, res, next) => {
-//   try {
-//     const currentUserId = req.session.userId;
-//
-//     if (!currentUserId) {
-//       return res.status(401).json({message: "로그인하지 않은 사용자입니다."});
-//     }
-//     await authRepository.clearUserSessionId(currentUserId);
-//
-//     await req.session.destroy();
-//
-//     res.clearCookie("session_cookie_name", {path: "/"});
-//
-//     res.status(200).json({message: "로그아웃 성공"});
-//   } catch (e) {
-//     next(e);
-//   }
-// });
+authController.post("/logout", async (req, res, next) => {
+  try {
+    const userId = req.session.userId;
+
+    if (!userId) {
+      return res.status(401).json({message: "로그인하지 않은 사용자입니다."});
+    }
+    await userRepository.clearSessionId(userId);
+
+    await req.session.destroy();
+
+    res.status(200).json(
+        apiResponse.success({message: "로그아웃 성공"})
+    );
+  } catch (e) {
+    next(e);
+  }
+});
 
 export default authController;
