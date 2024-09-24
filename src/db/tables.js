@@ -24,9 +24,9 @@ export default {
   ingredient: `
       CREATE TABLE IF NOT EXISTS ingredient
       (
-          recipeId char(36) PRIMARY KEY REFERENCES recipes (recipeId),
-          name     TEXT     not null,
-          quantity char(50) not null
+          recipeId char(36) REFERENCES recipes (recipeId),
+          name     varchar(100) not null,
+          quantity char(50)     not null
       )
   `,
 
@@ -43,11 +43,12 @@ export default {
   instructions: `
       CREATE TABLE IF NOT EXISTS instructions
       (
-          recipeId    char(36) PRIMARY KEY REFERENCES recipes (recipeId),
+          recipeId    char(36) REFERENCES recipes (recipeId),
+          stepOrder   INT  not null,
+          PRIMARY KEY (recipeId, stepOrder),
           title       TEXT not null,
           imgUrl      TEXT not null,
-          description TEXT not null,
-          stepOrder   INT  not null
+          description TEXT not null
       )
   `,
 };

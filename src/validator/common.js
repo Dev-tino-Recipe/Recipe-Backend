@@ -25,50 +25,6 @@ export const UserNameLengthCheck = (key, value) => {
   }
 };
 
-export const TitleLengthCheck = (key, value) => {
-  try {
-    BlankCheck(key, value);
-    if (2 > value.length || 20 < value.length) {
-      throw new Error(`${key}는 2이상 20이하여야 합니다.`);
-    }
-  } catch (e) {
-    throw new Error(`${key}는 2이상 20이하여야 합니다.`);
-  }
-};
-
-export const DescriptionLengthCheck = (key, value) => {
-  try {
-    BlankCheck(key, value);
-    if (10 > value.length || 50 < value.length) {
-      throw new Error(`${key}는 10이상 50이하여야 합니다.`);
-    }
-  } catch (e) {
-    throw new Error(`${key}는 10이상 50이하여야 합니다.`);
-  }
-};
-
-export const NameLengthCheck = (key, value) => {
-  try {
-    BlankCheck(key, value);
-    if (1 > value.length || 20 < value.length) {
-      throw new Error(`${key}는 1이상 20이하여야 합니다.`);
-    }
-  } catch (e) {
-    throw new Error(`${key}는 1이상 20이하여야 합니다.`);
-  }
-};
-
-export const QuantityLengthCheck = (key, value) => {
-  try {
-    BlankCheck(key, value);
-    if (2 > value.length || 20 < value.length) {
-      throw new Error(`${key}는 2이상 20이하여야 합니다.`);
-    }
-  } catch (e) {
-    throw new Error(`${key}는 2이상 20이하여야 합니다.`);
-  }
-};
-
 export const NumberType = (key, value) => {
   try {
     BlankCheck(key, value);

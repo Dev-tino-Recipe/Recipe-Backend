@@ -1,78 +1,51 @@
 import express from "express";
+import {
+  validRecipeDescription,
+  validRecipeIngredients,
+  validRecipeInstructions,
+  validRecipeTitle
+} from "../validator/recipe.js";
+import {validUserId} from "../validator/auth.js";
+import recipeRepository from "../repository/recipeRepository.js";
+import apiResponse from "../dto/apiResponse.js";
 
 const recipeController = express.Router();
 
-// recipeController.post(
-//     "/regist",
-//     upload_single("image"),
-//     async (req, res, next) => {
-//       try {
-//         const {
-//           user_id,
-//           title,
-//           thumbnail,
-//           description,
-//           ingredients,
-//           instructions,
-//         } = req.body;
-//
-//         TitleLengthCheck("title", title);
-//         DescriptionLengthCheck("description", description);
-//
-//         if (Array.isArray(ingredients)) {
-//           ingredients.forEach((ingredient) => {
-//             NameLengthCheck("name", ingredient.name);
-//             QuantityLengthCheck("quantity", ingredient.quantity);
-//           });
-//         } else {
-//           throw new CustomError("Ingredients must be an array.", 400);
-//         }
-//
-//         if (Array.isArray(instructions)) {
-//           instructions.forEach((instruction) => {
-//             TitleLengthCheck("instruction title", instruction.title);
-//             DescriptionLengthCheck(
-//                 "instruction description",
-//                 instruction.description,
-//             );
-//           });
-//           console.log(instructions);
-//         } else {
-//           throw new CustomError("Instructions must be an array.", 400);
-//         }
-//
-//         // UserNameCheck(user_id);
-//         const recipe_id = generate_uuid();
-//
-//         //const finalThumbnail = data ? data.path : req.body.thumbnail;
-//
-//         const newRecipe = {
-//           recipe_id,
-//           user_id,
-//           title,
-//           thumbnail,
-//           description,
-//           ingredients,
-//           instructions,
-//         };
-//         // 트랜젝션 시작
-//         const result = await recipeRepository.createRecipe(newRecipe);
-//         // 트랜젝션 종료
-//         if (result) {
-//           res.status(200).json({
-//             is_success: true,
-//             message: "레시피 등록에 성공했습니다.",
-//             recipe_id,
-//           });
-//         } else {
-//           throw new CustomError("레시피 등록에 실패했습니다.", 400);
-//         }
-//       } catch (e) {
-//         next(e);
-//       }
-//     },
-// );
-//
+recipeController.post(
+    "/regist",
+    async (req, res, next) => {
+      try {
+        const {
+          userId, title, thumbnail, description, ingredients, instructions,
+        } = req.body;
+
+        await validUserId("userId", userId);
+        validRecipeTitle("title", title);
+        validRecipeDescription("description", description);
+
+        // name, quantity 두개의 key를 가진 object가 들어있는 배열
+        validRecipeIngredients("ingredients", ingredients);
+
+        // title, description, imgUrl 세개의 key를 가진 object가 들어있는 배열
+        validRecipeInstructions("instructions", instructions);
+
+        console.log("유효성 검사 통과");
+
+        await recipeRepository.createRecipe({
+          userId, title, thumbnail, description, ingredients, instructions,
+        });
+
+        console.log("레시피 등록 성공");
+
+        res.status(200).json(
+            apiResponse.success({message: "레시피가 성공적으로 등록되었습니다."})
+        );
+      } catch (e) {
+        next(e);
+      }
+    },
+);
+
 // recipeController.get("/recheck", async (req, res, next) => {
 //   const {page, pageSize, user_id} = req.query;
 //
@@ -112,7 +85,7 @@ const recipeController = express.Router();
 //     next(e);
 //   }
 // });
-//
+
 // recipeController.get("/detail", async (req, res, next) => {
 //   try {
 //     const {recipe_id} = req.query;
@@ -135,7 +108,7 @@ const recipeController = express.Router();
 //     next(e);
 //   }
 // });
-//
+
 // recipeController.get("/recent", async (req, res, next) => {
 //   try {
 //     const {recipe_id} = req.body;
@@ -164,7 +137,7 @@ const recipeController = express.Router();
 //     next(e);
 //   }
 // });
-//
+
 // recipeController.put("/post", async (req, res, next) => {
 //   const {
 //     recipe_id,

@@ -1,4 +1,5 @@
 import mysql2 from "mysql2/promise";
+
 import dotenv from "dotenv";
 import tables from "./tables.js";
 
@@ -9,6 +10,8 @@ export const conn = mysql2.createPool({
   host: "localhost",
   port: 3301,
   user: process.env.DB_USER,
+  waitForConnections: true,
+  maxIdle: 10,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_DATABASE,
   connectionLimit: 10,
@@ -32,3 +35,41 @@ export const initDB = async () => {
     }
   }
 };
+
+/**
+ * @return {Promise<mysql2.PoolConnection>}
+ */
+const getConnection = async () => {
+  return conn.getConnection();
+}
+
+/**
+ * @param {(conn: mysql2.PoolConnection) => Promise} logic
+ * @return {Promise<*|null>}
+ */
+export const transaction = async (logic) => {
+  let connection = await getConnection();
+  try {
+    await connection.beginTransaction();
+
+    //connection만 넣어준다.
+    const result = await logic(connection);
+
+    await connection.commit();
+    return result;
+  } catch (err) {
+    if (connection) {
+      await connection.rollback()
+    }
+
+    console.error(err);
+    throw new Error("transaction error");
+  } finally {
+    if (connection) {
+      connection.release()
+    }
+  }
+};
+
+
+
