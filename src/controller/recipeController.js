@@ -71,8 +71,9 @@ recipeController.post(
         ingredients,
         instructions,
       };
-
+      // 트랜젝션 시작
       const result = await recipeRepository.createRecipe(newRecipe);
+      // 트랜젝션 종료
       if (result) {
         res.status(200).json({
           is_success: true,
@@ -133,18 +134,18 @@ recipeController.get("/detail", async (req, res, next) => {
     const { recipe_id } = req.query;
     // console.log(recipe_id);
     const result = await recipeRepository.getRecipe(recipe_id);
-    if (result.length) {
+    if (result) {
       res.status(200).json({
         isMine: false,
         isBookMarked: true,
         isSuccess: true,
         message: "상세 레시피가 정상 조회되었습니다.",
-        result: result,
+        result,
       });
     } else {
       res
         .status(400)
-        .json({ message: "상세 레시피 조회가 실패했습니다.", result: result });
+        .json({ message: "상세 레시피 조회가 실패했습니다.", result });
     }
   } catch (e) {
     next(e);

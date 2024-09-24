@@ -31,11 +31,9 @@ authController.post("/signup", async (req, res, next) => {
 
 authController.post("/duplicate", async (req, res, next) => {
   try {
-    const user_name = req.body;
-    const user = await UserNameCheck("user_name", user_name);
-    if (user !== undefined && user.length >= 1) {
-      throw new CustomError("이미 존재하는 아이디입니다.", 500);
-    }
+    const { user_name } = req.body;
+    await UserNameCheck("user_name", user_name);
+
     res
       .status(200)
       .json({ isSuccess: true, message: "사용가능한 아이디입니다." });
@@ -81,14 +79,8 @@ authController.post("/logout", async (req, res, next) => {
     }
     await authRepository.clearUserSessionId(currentUserId);
 
-    await new Promise((resolve, reject) => {
-      req.session.destroy((err) => {
-        if (err) {
-          return reject(err);
-        }
-        resolve();
-      });
-    });
+    await req.session.destroy();
+
     res.clearCookie("session_cookie_name", { path: "/" });
 
     res.status(200).json({ message: "로그아웃 성공" });

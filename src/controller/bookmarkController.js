@@ -29,7 +29,12 @@ bookmarkController.delete("/delete", async (req, res, next) => {
   try {
     const del = await bookmarkRepository.deleteBookmark(user_id, recipe_id);
     if (del.affectedRows) {
-      res.status(200).json(returnResponse(true, "북마크 삭제에 성공했습니다."));
+      res.status(200).json(
+        returnResponse({
+          success: true,
+          message: "북마크 삭제에 성공했습니다.",
+        }),
+      );
     } else {
       res
         .status(400)

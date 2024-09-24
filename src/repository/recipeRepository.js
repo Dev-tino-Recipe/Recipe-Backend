@@ -1,4 +1,4 @@
-import conn from "../connection/connection.js";
+import conn from "../db/connection.js";
 import { v4 as generate_uuid } from "uuid";
 import recipeController from "../controller/recipeController.js";
 
@@ -13,52 +13,49 @@ export default {
   }) => {
     const recipe_id = generate_uuid();
 
+    console.log([recipe_id, user_id, title, thumbnail, description]);
+
     const ris = await conn.query(
       `INSERT INTO Recipes
-        (
-            recipe_id,
-            user_id,
-            title,
-            thumbnail,
-            description
-        )
-        VALUES (?, ?, ?, ?, ?)`,
+         (recipe_id,
+          user_id,
+          title,
+          thumbnail,
+          description)
+         VALUES (?, ?, ?, ?, ?)`,
       [recipe_id, user_id, title, thumbnail, description],
     );
 
     for (const ingredient of ingredients) {
       await conn.query(
         `
-                INSERT INTO Ingredient
-                (
-                    recipe_id,
-                    name,
-                    quantity
-                )
-                VALUES (?, ?, ?)
-            `,
+              INSERT INTO Ingredient
+              (recipe_id,
+               name,
+               quantity)
+              VALUES (?, ?, ?)
+          `,
         [recipe_id, ingredient.name, ingredient.quantity],
       );
     }
     for (const instruction of instructions) {
+      const index = instructions.indexOf(instruction);
       await conn.query(
         `
-                INSERT INTO Instructions
-                (
-                    recipe_id,
-                    title,
-                    img_url,
-                    description,
-                    step_order
-                )
-                VALUES (?, ?, ?, ?,?)
-            `,
+              INSERT INTO Instructions
+              (recipe_id,
+               title,
+               img_url,
+               description,
+               step_order)
+              VALUES (?, ?, ?, ?, ?)
+          `,
         [
           recipe_id,
           instruction.title,
-          instruction.img_url,
+          instruction.img_url ?? null,
           instruction.description,
-          instruction.step_order,
+          index + 1,
         ],
       );
     }
@@ -72,10 +69,10 @@ export default {
 
     return await conn.query(
       `SELECT *
-            FROM recipes
-        WHERE user_id = ?
-            ORDER BY created_at DESC
-        LIMIT ?, ?;`,
+         FROM recipes
+         WHERE user_id = ?
+         ORDER BY created_at DESC
+         LIMIT ?, ?;`,
       [user_id, skipSizeStr, pageSizeStr],
     );
   },
@@ -89,28 +86,37 @@ export default {
     instructions,
   }) => {
     const ru = await conn.query(
-      `UPDATE Recipes SET title = ?, thumbnail = ?, description = ?, updated_at = CURRENT_TIMESTAMP() where recipe_id = ?;`,
+      `UPDATE Recipes
+         SET title       = ?,
+             thumbnail   = ?,
+             description = ?,
+             updated_at  = CURRENT_TIMESTAMP()
+         where recipe_id = ?;`,
       [title, thumbnail, description, recipe_id],
     );
-    await conn.query(`DELETE FROM ingredient WHERE recipe_id = ?;`, [
-      recipe_id,
-    ]);
+    await conn.query(
+      `DELETE
+         FROM ingredient
+         WHERE recipe_id = ?;`,
+      [recipe_id],
+    );
 
-    await conn.query(`DELETE FROM instructions WHERE recipe_id = ?;`, [
-      recipe_id,
-    ]);
+    await conn.query(
+      `DELETE
+         FROM instructions
+         WHERE recipe_id = ?;`,
+      [recipe_id],
+    );
 
     for (const ingredient of ingredients) {
       await conn.query(
         `
-                INSERT INTO Ingredient
-                (
-                    recipe_id,
-                    name,
-                    quantity
-                )
-                VALUES (?, ?, ?)
-            `,
+              INSERT INTO Ingredient
+              (recipe_id,
+               name,
+               quantity)
+              VALUES (?, ?, ?)
+          `,
         [recipe_id, ingredient.name, ingredient.quantity],
       );
     }
@@ -118,16 +124,14 @@ export default {
     for (const instruction of instructions) {
       await conn.query(
         `
-                INSERT INTO Instructions
-                (
-                    recipe_id,
-                    title,
-                    img_url,
-                    description,
-                    step_order
-                )
-                VALUES (?, ?, ?, ?,?)
-            `,
+              INSERT INTO Instructions
+              (recipe_id,
+               title,
+               img_url,
+               description,
+               step_order)
+              VALUES (?, ?, ?, ?, ?)
+          `,
         [
           recipe_id,
           instruction.title,
@@ -142,15 +146,22 @@ export default {
 
   getRecipe: async (recipeId) => {
     const res = await conn.query(
-      `SELECT title, img_url, description, step_order FROM Instructions WHERE recipe_id = ?`,
+      `SELECT title, img_url, description, step_order
+         FROM Instructions
+         WHERE recipe_id = ?`,
       [recipeId],
     );
     const ret = await conn.query(
-      `SELECT name, quantity FROM Ingredient WHERE recipe_id = ?`,
+      `SELECT name, quantity
+         FROM Ingredient
+         WHERE recipe_id = ?`,
       [recipeId],
     );
     const reu = await conn.query(
-      `SELECT r.title as title, r.description as description, r.created_at as created_at, u.user_name as user_name FROM recipes as r LEFT JOIN users as u on u.user_id = r.user_id WHERE r.recipe_id = ?`,
+      `SELECT r.title as title, r.description as description, r.created_at as created_at, u.user_name as user_name
+         FROM recipes as r
+                  LEFT JOIN users as u on u.user_id = r.user_id
+         WHERE r.recipe_id = ?`,
       [recipeId],
     );
 
@@ -175,12 +186,12 @@ export default {
       })),
     };
   },
-  getRecentRecipe : async (recipeId, placeholder) => {
-    const sql = `SELECT thumbnail, title, description FROM Recipes WHERE recipe_id IN (${placeholder})`;
+  getRecentRecipe: async (recipeId, placeholder) => {
+    const sql = `SELECT thumbnail, title, description
+                 FROM Recipes
+                 WHERE recipe_id IN (${placeholder})`;
 
-    const res = await conn.query(
-        sql,recipeId
-    );
+    const res = await conn.query(sql, recipeId);
     return res;
-  }
+  },
 };

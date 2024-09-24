@@ -1,4 +1,4 @@
-import conn from "../connection/connection.js";
+import conn from "../db/connection.js";
 import { v4 as generate_uuid } from "uuid";
 
 export default {
