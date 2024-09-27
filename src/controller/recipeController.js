@@ -139,23 +139,18 @@ recipeController.put("/update", async (req, res, next) => {
       instructions,
     } = req.body;
 
-    // recipeId 유효성 검사
     await validRecipeId("recipeId", recipeId);
 
-    // userId, title, description 유효성 검사
     await validUserId("userId", userId);
     validRecipeTitle("title", title);
     validRecipeDescription("description", description);
 
-    // name, quantity 두 개의 key를 가진 object가 들어있는 배열
     validRecipeIngredients("ingredients", ingredients);
 
-    // title, description, imgUrl 세 개의 key를 가진 object가 들어있는 배열
     validRecipeInstructions("instructions", instructions);
 
     // 트랜잭션 시작
     await transaction(async (connection) => {
-      // 레시피 수정
       await recipeRepository.update(
         recipeId,
         title,
@@ -174,12 +169,10 @@ recipeController.put("/update", async (req, res, next) => {
         connection,
       );
 
-      // 새로운 재료 저장
       ingredients.forEach(({ name, quantity }) => {
         ingredientRepository.save(recipeId, name, quantity, connection);
       });
 
-      // 새로운 조리법 단계 저장
       instructions.forEach(({ title, description, imgUrl }, idx) => {
         instructionRepository.save(
           recipeId,
@@ -195,7 +188,7 @@ recipeController.put("/update", async (req, res, next) => {
 
     res.status(200).json(
       apiResponse.success({
-        message: "레시피가 성공적으로 수정되었습니다.",
+        message: "레시피 수정에 성공했습니다.",
         result: { recipeId },
       }),
     );
@@ -203,47 +196,5 @@ recipeController.put("/update", async (req, res, next) => {
     next(e);
   }
 });
-
-// recipeController.put("/post", async (req, res, next) => {
-//   const {
-//     recipe_id,
-//     user_id,
-//     title,
-//     thumbnail,
-//     description,
-//     ingredients,
-//     instructions,
-//   } = req.body;
-//   // console.log(
-//   //   recipe_id,
-//   //   user_id,
-//   //   title,
-//   //   thumbnail,
-//   //   description,
-//   //   ingredients,
-//   //   instructions,
-//   // );
-//   try {
-//     const updateRecipe = {
-//       recipe_id,
-//       user_id,
-//       title,
-//       thumbnail,
-//       description,
-//       ingredients,
-//       instructions,
-//     };
-//     const result = await recipeRepository.recipeModify(updateRecipe);
-//     if (result) {
-//       res.status(200).json({
-//         is_success: true,
-//         message: "레시피 수정에 성공했습니다.",
-//         recipe_id,
-//       });
-//     }
-//   } catch (e) {
-//     next(e);
-//   }
-// });
 
 export default recipeController;
