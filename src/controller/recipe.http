@@ -34,6 +34,8 @@ Content-Type: application/json
 ###
 GET http://localhost:4000/api/recipe/detail?recipeId=718ce567-6616-4b9f-a837-9e11d4bb63d7
 
+###
+GET http://localhost:4000/api/recipe/recheck?page=1&pageSize=5&userId=a915fbd2-f96a-4e1f-aabf-20c96ac29043
 
 ###
 PUT http://localhost:4000/api/recipe/update

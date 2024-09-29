@@ -82,8 +82,8 @@ recipeController.get("/recheck", async (req, res, next) => {
   const { page, pageSize, userId } = req.query;
 
   try {
-    // const user_id = req.session.userId;
-
+    // const userId = req.session.userId;
+    //
     // if (!req.user) {
     //   throw new Error("로그인이 필요합니다.");
     // }
