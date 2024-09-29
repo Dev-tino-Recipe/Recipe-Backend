@@ -1,7 +1,7 @@
 import conn from "../db/connection.js";
 
 export default {
-  async findByRecipeIdAndUserId(recipeId, userId, connection) {
+  async findByRecipeIdAndUserId(recipeId, userId) {
     const findBookMarks = await conn.query(
       `
         SELECT *
@@ -10,7 +10,6 @@ export default {
           and userId = ?
     `,
       [recipeId, userId],
-      connection,
     );
 
     return findBookMarks[0];
@@ -30,7 +29,7 @@ export default {
   },
   deleteBookmark: async (user_id, recipe_id) => {
     const delBookmark = await conn.query(
-      `DELETE FROM Bookmark WHERE user_id = ? AND recipe_id = ?`,
+      `DELETE FROM Bookmark WHERE userId = ? AND recipeId = ?`,
       [user_id, recipe_id],
     );
     return delBookmark;

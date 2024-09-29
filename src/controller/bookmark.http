@@ -4,7 +4,14 @@ Content-Type: application/json
 
 {
   "userId": "8f8ac1a1-2cbd-4fab-bbcf-3b9a1fbfc32e",
-  "recipeId": "633bafd-e788-4636-83b7-92b8ad4226dc"
+  "recipeId": "633bafd5-e788-4636-83b7-92b8ad4226dc"
 }
 
 ###
+DELETE http://localhost:4000/api/bookmark/delete
+Content-Type: application/json
+
+{
+  "userId": "8f8ac1a1-2cbd-4fab-bbcf-3b9a1fbfc32e",
+  "recipeId": "633bafd5-e788-4636-83b7-92b8ad4226dc"
+}

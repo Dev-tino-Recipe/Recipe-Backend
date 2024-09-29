@@ -21,9 +21,20 @@ bookmarkController.post("/regist", async (req, res, next) => {
     }
     const findRecipe = await recipeRepository.findById(recipeId);
     if (!findRecipe) {
-      res.status(404).send(
+      res.status(404).json(
         apiResponse.failure({
           message: "존재하지 않는 레시피입니다.",
+        }),
+      );
+    }
+    const findBookmark = await bookmarkRepository.findByRecipeIdAndUserId(
+      recipeId,
+      userId,
+    );
+    if (findBookmark) {
+      res.status(400).json(
+        apiResponse.failure({
+          message: "이미 존재하는 북마크입니다.",
         }),
       );
     }
@@ -37,26 +48,27 @@ bookmarkController.post("/regist", async (req, res, next) => {
     next(e);
   }
 });
-//
-// bookmarkController.delete("/delete", async (req, res, next) => {
-//   const { user_id, recipe_id } = req.body;
-//   try {
-//     const del = await bookmarkRepository.deleteBookmark(user_id, recipe_id);
-//     if (del.affectedRows) {
-//       res.status(200).json(
-//         returnResponse({
-//           success: true,
-//           message: "북마크 삭제에 성공했습니다.",
-//         }),
-//       );
-//     } else {
-//       res
-//         .status(400)
-//         .json(returnResponse(false, "북마크 삭제에 실패했습니다."));
-//     }
-//   } catch (e) {
-//     next(e);
-//   }
-// });
+
+bookmarkController.delete("/delete", async (req, res, next) => {
+  const { userId, recipeId } = req.body;
+  try {
+    const del = await bookmarkRepository.deleteBookmark(userId, recipeId);
+    if (del.affectedRows) {
+      res.status(200).json(
+        apiResponse.success({
+          message: "북마크 삭제에 성공했습니다.",
+        }),
+      );
+    } else {
+      res.status(400).json(
+        apiResponse.failure({
+          message: "북마크 삭제에 실패했습니다.",
+        }),
+      );
+    }
+  } catch (e) {
+    next(e);
+  }
+});
 
 export default bookmarkController;
