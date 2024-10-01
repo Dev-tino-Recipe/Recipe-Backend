@@ -3,7 +3,7 @@ POST http://localhost:4000/api/recipe/regist
 Content-Type: application/json
 
 {
-  "userId": "8f8ac1a1-2cbd-4fab-bbcf-3b9a1fbfc32e",
+  "userId": "a915fbd2-f96a-4e1f-aabf-20c96ac29043",
   "title": "123456789",
   "thumbnail": "123456789",
   "description": "1234567890",
@@ -32,7 +32,7 @@ Content-Type: application/json
 }
 
 ###
-GET http://localhost:4000/api/recipe/detail?recipeId=633bafd5-e788-4636-83b7-92b8ad4226dc
+GET http://localhost:4000/api/recipe/detail?recipeId=78c4a6e2-4a7f-4194-bc8e-d2a159b3564b
 
 ###
 GET http://localhost:4000/api/recipe/recheck?page=1&pageSize=5&userId=a915fbd2-f96a-4e1f-aabf-20c96ac29043
@@ -42,11 +42,11 @@ PUT http://localhost:4000/api/recipe/update
 Content-Type: application/json
 
 {
-  "recipeId": "633bafd5-e788-4636-83b7-92b8ad4226dc",
-  "userId": "8f8ac1a1-2cbd-4fab-bbcf-3b9a1fbfc32e",
+  "recipeId": "78c4a6e2-4a7f-4194-bc8e-d2a159b3564b",
+  "userId": "a915fbd2-f96a-4e1f-aabf-20c96ac29043",
   "title": "12345678910",
   "thumbnail": "123456789abc",
-  "description": "1234567890",
+  "description": "123456789011",
   "ingredients": [
     {
       "name": "123456789",
@@ -70,3 +70,6 @@ Content-Type: application/json
     }
   ]
 }
+
+###
+GET http://localhost:4000/api/recipe/bookmarks?page=1&pageSize=5&userId=a915fbd2-f96a-4e1f-aabf-20c96ac29043

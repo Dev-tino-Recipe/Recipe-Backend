@@ -15,6 +15,7 @@ import ingredientRepository from "../repository/ingredientRepository.js";
 import instructionRepository from "../repository/instructionRepository.js";
 import userRepository from "../repository/userRepository.js";
 import recipeConverter from "../dto/recipeConverter.js";
+import bookmarkRepository from "../repository/bookmarkRepository.js";
 
 const recipeController = express.Router();
 
@@ -190,6 +191,31 @@ recipeController.put("/update", async (req, res, next) => {
       apiResponse.success({
         message: "레시피 수정에 성공했습니다.",
         result: { recipeId },
+      }),
+    );
+  } catch (e) {
+    next(e);
+  }
+});
+
+recipeController.get("/bookmarks", async (req, res, next) => {
+  const { page, pageSize, userId } = req.query;
+  try {
+    Positive("page", page);
+    InRange("pageSize", pageSize, 1, 10);
+    await validUserId("userId", userId);
+
+    const recipes = await recipeRepository.findBookmarkRecipes(
+      userId,
+      Number(page),
+      Number(pageSize),
+    );
+
+    // 해당 ID에 해당하는 레시피 목록 조회
+    res.status(200).json(
+      apiResponse.success({
+        message: "북마크된 레시피 조회에 성공했습니다.",
+        result: recipes,
       }),
     );
   } catch (e) {
