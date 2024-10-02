@@ -24,3 +24,7 @@ Content-Type: application/json
   "username" : "test1",
   "password": "test123456"
 }
+
+###
+POST http://localhost:4000/api/auth/logout
+
