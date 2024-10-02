@@ -90,16 +90,15 @@ authController.post("/login", async (req, res, next) => {
 
 authController.post("/logout", async (req, res, next) => {
   try {
-    const userId = req.session.userId;
-
-    if (!userId) {
+    const user = req.session.user;
+    if (!user) {
       return res
         .status(401)
         .json(
           apiResponse.failure({ message: "로그인하지 않은 사용자입니다." }),
         );
     }
-    await userRepository.clearSessionId(userId);
+    await userRepository.clearSessionId(user.userId);
 
     await req.session.destroy();
 
