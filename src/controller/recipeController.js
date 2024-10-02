@@ -9,7 +9,7 @@ import {
 import { validUserId } from "../validator/auth.js";
 import recipeRepository from "../repository/recipeRepository.js";
 import apiResponse from "../dto/apiResponse.js";
-import { InRange, Positive } from "../validator/common.js";
+import { InRange, Positive, NumberType } from "../validator/common.js";
 import { transaction } from "../db/connection.js";
 import ingredientRepository from "../repository/ingredientRepository.js";
 import instructionRepository from "../repository/instructionRepository.js";
@@ -197,4 +197,9 @@ recipeController.put("/update", async (req, res, next) => {
   }
 });
 
+recipeController.get("/search", async (req, res, next) => {
+  const { page, pageSize, keyword } = req.query;
+  NumberType("page", page);
+  NumberType("pageSize", pageSize);
+});
 export default recipeController;

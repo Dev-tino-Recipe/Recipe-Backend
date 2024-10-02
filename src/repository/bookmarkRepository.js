@@ -25,7 +25,7 @@ export default {
         VALUES (?, ?)`,
       [user_id, recipe_id],
     );
-    return insertBookmark;
+    return insertBookmark.affectedRows;
   },
   deleteBookmark: async (user_id, recipe_id) => {
     const delBookmark = await conn.query(

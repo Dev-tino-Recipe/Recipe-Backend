@@ -90,6 +90,11 @@ export default {
       connection,
     );
   },
+  search: async () => {
+    const recipeSql = `
+    SELECT 
+    `;
+  },
 
   // getRecipe: async (recipeId) => {
   //   const res = await conn.query(
