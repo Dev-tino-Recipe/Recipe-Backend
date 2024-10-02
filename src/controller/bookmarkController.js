@@ -39,10 +39,12 @@ bookmarkController.post("/regist", async (req, res, next) => {
       );
     }
     const insert = await bookmarkRepository.createBookmark(userId, recipeId);
-    if (insert.affectedRows) {
-      res
-        .status(200)
-        .json({ is_Success: true, message: "북마크 등록에 성공했습니다." });
+    if (insert) {
+      res.status(200).json(
+        apiResponse.success({
+          message: "북마크 등록에 성공했습니다.",
+        }),
+      );
     }
   } catch (e) {
     next(e);
