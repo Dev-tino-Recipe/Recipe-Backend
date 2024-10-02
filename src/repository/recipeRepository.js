@@ -1,5 +1,6 @@
 import conn from "../db/connection.js";
 import { v4 as uuid } from "uuid";
+import connection from "../db/connection.js";
 
 export default {
   save: async (userId, title, thumbnail, description, connection) => {
@@ -56,11 +57,6 @@ export default {
       connection,
     );
   },
-  search: async () => {
-    const recipeSql = `
-    SELECT 
-    `;
-  },
 
   findBookmarkRecipes: async (userId, page, pageSize, connection) => {
     const skipStr = ((page - 1) * pageSize).toString();
@@ -77,6 +73,25 @@ export default {
       recipeSql,
       [userId, skipStr, pageSizeStr],
       connection,
+    );
+  },
+  findByRecipeTitle: async (page, pageSize, keyword) => {
+    keyword = "%" + keyword + "%";
+    console.log(keyword);
+    const pageStart = ((page - 1) * pageSize).toString();
+
+    return await conn.query(
+      `SELECT 
+            recipeId, 
+            thumbnail, 
+            title, 
+            description,
+            updatedAt 
+            FROM recipes 
+            WHERE title like ?
+            LIMIT ?, ?;
+            `,
+      [keyword, pageStart, pageSize],
     );
   },
 };

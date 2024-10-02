@@ -119,10 +119,12 @@ recipeController.get("/detail", async (req, res, next) => {
 
     const result = await recipeConverter.toRecipeDetail(findRecipe);
 
-    res.status(200).json({
-      message: "상세 레시피가 정상 조회되었습니다.",
-      result,
-    });
+    res.status(200).json(
+      apiResponse.success({
+        message: "상세 레시피가 정상 조회되었습니다.",
+        result,
+      }),
+    );
   } catch (e) {
     next(e);
   }
@@ -227,5 +229,24 @@ recipeController.get("/search", async (req, res, next) => {
   const { page, pageSize, keyword } = req.query;
   NumberType("page", page);
   NumberType("pageSize", pageSize);
+  const recipes = await recipeRepository.findByRecipeTitle(
+    page,
+    pageSize,
+    keyword,
+  );
+  if (recipes.length) {
+    res.status(200).json(
+      apiResponse.success({
+        message: "레시피 검색에 성공했습니다.",
+        result: recipes,
+      }),
+    );
+  } else {
+    res.status(200).json(
+      apiResponse.success({
+        message: "검색된 결과가 없습니다.",
+      }),
+    );
+  }
 });
 export default recipeController;
