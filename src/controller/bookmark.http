@@ -3,8 +3,8 @@ POST http://localhost:4000/api/bookmark/regist
 Content-Type: application/json
 
 {
-  "userId": "8f8ac1a1-2cbd-4fab-bbcf-3b9a1fbfc32e",
-  "recipeId": "633bafd5-e788-4636-83b7-92b8ad4226dc"
+  "userId": "a915fbd2-f96a-4e1f-aabf-20c96ac29043",
+  "recipeId": "78c4a6e2-4a7f-4194-bc8e-d2a159b3564b"
 }
 
 ###
@@ -12,6 +12,6 @@ DELETE http://localhost:4000/api/bookmark/delete
 Content-Type: application/json
 
 {
-  "userId": "8f8ac1a1-2cbd-4fab-bbcf-3b9a1fbfc32e",
-  "recipeId": "633bafd5-e788-4636-83b7-92b8ad4226dc"
+  "userId": "a915fbd2-f96a-4e1f-aabf-20c96ac29043",
+  "recipeId": "ef14776c-7208-4908-9093-fa9189b9de5b"
 }
