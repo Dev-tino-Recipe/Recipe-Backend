@@ -1,4 +1,12 @@
 import express from "express";
+import { transaction } from "../db/connection.js";
+import apiResponse from "../dto/apiResponse.js";
+import recipeConverter from "../dto/recipeConverter.js";
+import ingredientRepository from "../repository/ingredientRepository.js";
+import instructionRepository from "../repository/instructionRepository.js";
+import recipeRepository from "../repository/recipeRepository.js";
+import { validUserId } from "../validator/auth.js";
+import { InRange, NumberType, Positive } from "../validator/common.js";
 import {
   validRecipeDescription,
   validRecipeId,
@@ -6,24 +14,14 @@ import {
   validRecipeInstructions,
   validRecipeTitle,
 } from "../validator/recipe.js";
-import { validUserId } from "../validator/auth.js";
-import recipeRepository from "../repository/recipeRepository.js";
-import apiResponse from "../dto/apiResponse.js";
-import { InRange, Positive, NumberType } from "../validator/common.js";
-import { transaction } from "../db/connection.js";
-import ingredientRepository from "../repository/ingredientRepository.js";
-import instructionRepository from "../repository/instructionRepository.js";
-import userRepository from "../repository/userRepository.js";
-import recipeConverter from "../dto/recipeConverter.js";
-import bookmarkRepository from "../repository/bookmarkRepository.js";
 
 const recipeController = express.Router();
 
 recipeController.post("/regist", async (req, res, next) => {
   try {
-    const { userId, title, thumbnail, description, ingredients, instructions } =
+    const { title, thumbnail, description, ingredients, instructions } =
       req.body;
-    await validUserId("userId", userId);
+    const userId = req.session.user.userId;
     validRecipeTitle("title", title);
     validRecipeDescription("description", description);
 
@@ -33,8 +31,6 @@ recipeController.post("/regist", async (req, res, next) => {
     // title, description, imgUrl 세개의 key를 가진 object가 들어있는 배열
     validRecipeInstructions("instructions", instructions);
 
-    //ingredients, instructions,
-
     // 트랜젝션 시작
     const recipeId = await transaction(async (connection) => {
       // 레시피 저장
@@ -43,7 +39,7 @@ recipeController.post("/regist", async (req, res, next) => {
         title,
         thumbnail,
         description,
-        connection,
+        connection
       );
 
       // 레시피의 각 요소 저장
@@ -59,7 +55,7 @@ recipeController.post("/regist", async (req, res, next) => {
           description,
           imgUrl,
           idx + 1,
-          connection,
+          connection
         );
       });
 
@@ -71,7 +67,7 @@ recipeController.post("/regist", async (req, res, next) => {
       apiResponse.success({
         message: "레시피가 성공적으로 등록되었습니다.",
         result: { recipeId },
-      }),
+      })
     );
   } catch (e) {
     next(e);
@@ -96,14 +92,14 @@ recipeController.get("/recheck", async (req, res, next) => {
     const recipes = await recipeRepository.findByUserId(
       userId,
       Number(page),
-      Number(pageSize),
+      Number(pageSize)
     );
 
     res.status(200).json(
       apiResponse.success({
         message: "등록한 레시피 조회에 성공했습니다.",
         result: recipes,
-      }),
+      })
     );
   } catch (e) {
     next(e);
@@ -123,7 +119,7 @@ recipeController.get("/detail", async (req, res, next) => {
       apiResponse.success({
         message: "상세 레시피가 정상 조회되었습니다.",
         result,
-      }),
+      })
     );
   } catch (e) {
     next(e);
@@ -159,17 +155,17 @@ recipeController.put("/update", async (req, res, next) => {
         title,
         thumbnail,
         description,
-        connection,
+        connection
       );
 
       // 기존 재료 및 조리법 삭제
       await ingredientRepository.deleteIngredientsByRecipeId(
         recipeId,
-        connection,
+        connection
       );
       await instructionRepository.deleteInstructionsByRecipeId(
         recipeId,
-        connection,
+        connection
       );
 
       ingredients.forEach(({ name, quantity }) => {
@@ -183,7 +179,7 @@ recipeController.put("/update", async (req, res, next) => {
           description,
           imgUrl,
           idx + 1,
-          connection,
+          connection
         );
       });
     });
@@ -193,7 +189,7 @@ recipeController.put("/update", async (req, res, next) => {
       apiResponse.success({
         message: "레시피 수정에 성공했습니다.",
         result: { recipeId },
-      }),
+      })
     );
   } catch (e) {
     next(e);
@@ -210,7 +206,7 @@ recipeController.get("/bookmarks", async (req, res, next) => {
     const recipes = await recipeRepository.findBookmarkRecipes(
       userId,
       Number(page),
-      Number(pageSize),
+      Number(pageSize)
     );
 
     // 해당 ID에 해당하는 레시피 목록 조회
@@ -218,34 +214,31 @@ recipeController.get("/bookmarks", async (req, res, next) => {
       apiResponse.success({
         message: "북마크된 레시피 조회에 성공했습니다.",
         result: recipes,
-      }),
+      })
     );
   } catch (e) {
     next(e);
   }
 });
+
 recipeController.get("/search", async (req, res, next) => {
-  const { page, pageSize, keyword } = req.query;
-  NumberType("page", page);
-  NumberType("pageSize", pageSize);
-  const recipes = await recipeRepository.findByRecipeTitle(
-    page,
-    pageSize,
-    keyword,
-  );
-  if (recipes.length) {
+  try {
+    const { page, pageSize, keyword } = req.query;
+    NumberType("page", page);
+    NumberType("pageSize", pageSize);
+    const recipes = await recipeRepository.findByRecipeTitle(
+      page,
+      pageSize,
+      keyword
+    );
     res.status(200).json(
       apiResponse.success({
         message: "레시피 검색에 성공했습니다.",
         result: recipes,
-      }),
+      })
     );
-  } else {
-    res.status(200).json(
-      apiResponse.success({
-        message: "검색된 결과가 없습니다.",
-      }),
-    );
+  } catch (error) {
+    next(error);
   }
 });
 export default recipeController;

@@ -31,6 +31,7 @@ export const validPassword = (key, password) => {
 }
 
 export const validUserId = async (key, userId) => {
+  BlankCheck(key, userId);
   const findUser = await userRepository.findById(userId);
   if (!findUser) {
     throw new CustomError("해당 유저는 존재하지 않습니다.", 400);
