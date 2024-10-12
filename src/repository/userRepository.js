@@ -26,7 +26,7 @@ export default {
   findByUsername: async (username, connection) => {
     const sql = `
         SELECT *
-        FROM Users
+        FROM users
         WHERE username = ?
     `
     return (await conn.query(sql, [username], connection))[0];
