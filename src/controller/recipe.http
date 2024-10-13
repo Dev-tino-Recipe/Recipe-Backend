@@ -1,9 +1,9 @@
 ### GET request to example server
-POST http://localhost:4000/api/recipe/regist
+POST http://3.35.71.206:4000/api/recipe/regist
 Content-Type: application/json
 
 {
-  "userId": "a915fbd2-f96a-4e1f-aabf-20c96ac29043",
+  "userId": "fb5e1c85-b89a-41f3-ab77-cbf5f4059543",
   "title": "123456789",
   "thumbnail": "123456789",
   "description": "1234567890",
@@ -32,18 +32,18 @@ Content-Type: application/json
 }
 
 ###
-GET http://localhost:4000/api/recipe/detail?recipeId=78c4a6e2-4a7f-4194-bc8e-d2a159b3564b
+GET http://3.35.71.206:4000/api/recipe/detail?recipeId=4e44bc81-fafb-4935-b88b-122ea5a229c4
 
 ###
-GET http://localhost:4000/api/recipe/recheck?page=1&pageSize=5&userId=a915fbd2-f96a-4e1f-aabf-20c96ac29043
+GET http://3.35.71.206:4000/api/recipe/recheck?page=1&pageSize=5&userId=fb5e1c85-b89a-41f3-ab77-cbf5f4059543
 
 ###
-PUT http://localhost:4000/api/recipe/update
+PUT http://3.35.71.206:4000/api/recipe/update
 Content-Type: application/json
 
 {
-  "recipeId": "78c4a6e2-4a7f-4194-bc8e-d2a159b3564b",
-  "userId": "a915fbd2-f96a-4e1f-aabf-20c96ac29043",
+  "recipeId": "4e44bc81-fafb-4935-b88b-122ea5a229c4",
+  "userId": "fb5e1c85-b89a-41f3-ab77-cbf5f4059543",
   "title": "12345678910",
   "thumbnail": "123456789abc",
   "description": "123456789011",

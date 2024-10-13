@@ -18,7 +18,7 @@ export default {
   },
   async deleteIngredientsByRecipeId(recipeId, connection) {
     return conn.query(
-      "DELETE FROM Ingredient WHERE recipeId = ?;",
+      "DELETE FROM ingredient WHERE recipeId = ?;",
       [recipeId],
       connection,
     );
